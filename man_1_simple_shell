@@ -1,0 +1,71 @@
+.TH SIMPLE_SHELL 1 "September 16, 2026" "Holberton School" "User Commands"
+.SH NAME
+simple_shell \- simple UNIX command interpreter
+.SH SYNOPSIS
+.B ./hsh
+.RB [ command ]
+.SH DESCRIPTION
+.B simple_shell
+is a simple UNIX command interpreter that executes commands entered by
+the user.
+
+The shell displays a prompt, reads a command, searches for the executable
+using the PATH environment variable, and executes the command.
+
+The shell supports both interactive and non-interactive modes.
+.SH OPTIONS
+This shell does not support command-line options.
+.SH BUILTINS
+The shell supports the following built-in commands:
+.TP
+.B exit
+Exits the shell.
+.TP
+.B env
+Prints the current environment.
+.SH INTERACTIVE MODE
+In interactive mode, the shell displays a prompt and waits for the user
+to enter a command.
+
+Example:
+.PP
+.nf
+$ ./hsh
+$ ls
+$ pwd
+$ exit
+.fi
+.SH NON-INTERACTIVE MODE
+Commands can also be provided through standard input.
+
+Example:
+.PP
+.nf
+$ echo "ls" | ./hsh
+.fi
+.SH EXAMPLES
+Execute the shell:
+.PP
+.nf
+$ ./hsh
+.fi
+.PP
+Execute a command through standard input:
+.PP
+.nf
+$ echo "/bin/ls" | ./hsh
+.fi
+.SH RETURN VALUE
+The shell returns the exit status of the last command executed.
+.SH ENVIRONMENT
+The shell uses environment variables, including
+.B PATH,
+to locate executable commands.
+.SH SEE ALSO
+.BR sh (1),
+.BR bash (1),
+.BR execve (2),
+.BR fork (2),
+.BR wait (2)
+.SH AUTHORS
+Written by Tasha Arroyo Ruiz - Simple Shell project at Holberton School.
