@@ -46,7 +46,7 @@ int main(void)
 			*end = '\0';
 			end--;
 		}
-		argv[0] = line;
+		argv[0] = start;
 		argv[1] = NULL;
 
 		child = fork();
