@@ -51,10 +51,7 @@ int main(void)
 			exit(127);
 			
 		}
-		else
-		{
-			wait(&status);
-		}
+		wait(&status);
 	}
 	return (0);
 }
