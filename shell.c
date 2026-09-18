@@ -6,43 +6,55 @@
  */
 int main(void)
 {
-	char **args;
-	char *input = NULL;
-	size_t buffer_size = 0;
-	int count = 0, mode = isatty(STDIN_FILENO), comparator;
+	char *line = NULL;
+	size_t len = 0;
+	ssize_t read;
+	pid_t child;
+	int status;
+	char *argv[2];
 
 	while (1)
 	{
-		if (mode)
-			printf("#cisfun$ ");
-		if (getline(&input, &buffer_size, stdin) == -1) /* Reading the user input */
-		{
-			free(input);
-			break; /* Handling the eof (ctrl + D) */
-		}
-		count++;
-		if (input[strlen(input)] == '\n') /* Trim trailing the newline */
-			input[strlen(input)] = '\0';
-		args = parse_input(input); /* Tokenize the user input */
+		if (isatty(STDIN_FILENO))
+			write(STDOUT_FILENO, "$ ", 2);
 
-		if (args == NULL)
+		read = getline(&line, &len, stdin);
+
+		if (read == -1)
 		{
-			free(input);
-			free(args);
+			free(line);
+			if (isatty(STDIN_FILENO))
+				write(STDOUT_FILENO, "\n", 1);
+			return (0);
+		}
+		if (read > 0 && line[read - 1] == '\n')
+			line[read - 1] = '\0';
+
+		if (line[0] == '\0')
+			continue;
+
+		argv[0] = line;
+		argv[1] = NULL;
+
+		child = fork();
+
+		if (child == -1)
+		{
+			perror("fork");
 			continue;
 		}
-		if (args[0] != NULL)
+
+		if (child == 0)
 		{
-			comparator = env_fetch(args, input, count);
-			free(args);
-			if (comparator == 0)
-				continue;
-			else
-				break;
+			execve(argv[0], argv, environ);
+			perror(argv[0]);
+			exit(127);
+			
 		}
-		free(args);
+		else
+		{
+			wait(&status);
+		}
 	}
-	if (mode)
-		printf("\n");
 	return (0);
 }
