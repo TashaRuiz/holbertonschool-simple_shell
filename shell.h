@@ -9,5 +9,5 @@
 #include <sys/wait.h>
 
 #define MAX_ARGS 10
-
+extern char **environ;
 #endif
