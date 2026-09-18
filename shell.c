@@ -45,7 +45,7 @@ int main(void)
 			argc++;
 			token = strtok(NULL, " \t");
 		}
-		/*argv[argc] = NULL;*/
+		argv[argc] = NULL;
 	
 		start = line;/*the begining of the program to avoid whitespace*/
 		while (*start == ' ' || *start == '\t')
@@ -59,7 +59,7 @@ int main(void)
 			end--;
 		}
 		argv[0] = start;
-		argv[argc + 1] = NULL;/*the end of whitespace program*/
+		argv[1] = NULL;/*the end of whitespace program*/
 
 		child = fork();
 
