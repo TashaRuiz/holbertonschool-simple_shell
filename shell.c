@@ -10,8 +10,10 @@ int main(void)
 	size_t len = 0;
 	ssize_t read;
 	pid_t child;
-	int status;
-	char *argv[2];
+	int status;i
+	char *argv[64];
+	char *token;
+	int argc = 0;
 	char *start;
 	char *end;
 
@@ -35,7 +37,17 @@ int main(void)
 		if (line[0] == '\0')
 			continue;
 
-		start = line;
+		token = strtok(line, " \t");
+
+		while (token != NULL && argc < 63)
+		{
+			argv[argc] = token;
+			argc++;
+			token = strtok(NULL, " \t");
+		}
+		argv[argc] = NULL;
+	
+		start = line;/*the begining of the program to avoid whitespace*/
 		while (*start == ' ' || *start == '\t')
 			start++;
 
@@ -47,7 +59,7 @@ int main(void)
 			end--;
 		}
 		argv[0] = start;
-		argv[1] = NULL;
+		argv[1] = NULL;/*the end of whitespace program*/
 
 		child = fork();
 
