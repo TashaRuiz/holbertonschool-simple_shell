@@ -65,15 +65,15 @@ int main(void)
 
 		if (child == -1)
 		{
-			perror("fork");
-			continue;
+			perror("./hsh");
+			return (1);
 		}
 
 		if (child == 0)
 		{
 			execve(argv[0], argv, environ);
 			perror(argv[0]);
-			exit(127);
+			exit(1);
 			
 		}
 		wait(&status);
