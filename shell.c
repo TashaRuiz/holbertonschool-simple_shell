@@ -12,6 +12,8 @@ int main(void)
 	pid_t child;
 	int status;
 	char *argv[2];
+	char *start;
+	char *end;
 
 	while (1)
 	{
@@ -33,6 +35,17 @@ int main(void)
 		if (line[0] == '\0')
 			continue;
 
+		start = line;
+		while (*start == ' ' || *start == '\t')
+			start++;
+
+		end = start + strlen(start) - 1;
+
+		while (end >= start && (*end == ' ' || *end == '\t'))
+		{
+			*end = '\0';
+			end--;
+		}
 		argv[0] = line;
 		argv[1] = NULL;
 
