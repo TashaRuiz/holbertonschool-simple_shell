@@ -10,7 +10,7 @@ int main(void)
 	size_t len = 0;
 	ssize_t read;
 	pid_t child;
-	int status;i
+	int status;
 	char *argv[64];
 	char *token;
 	int argc = 0;
