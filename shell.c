@@ -59,7 +59,7 @@ int main(void)
 			end--;
 		}
 		argv[0] = start;
-		argv[argc] = NULL;/*the end of whitespace program*/
+		argv[argc + 1] = NULL;/*the end of whitespace program*/
 
 		child = fork();
 
