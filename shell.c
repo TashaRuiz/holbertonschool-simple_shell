@@ -154,6 +154,7 @@ int main(int argc, char **argv, char **env)
 	ssize_t read;
 	int status = 0;
 	int result;
+	(void)argc;
 
 	while (1)
 	{
