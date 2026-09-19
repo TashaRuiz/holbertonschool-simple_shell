@@ -56,7 +56,19 @@ int main(void)
 
 		if (argc == 0)
 			continue;
-	
+
+		start = line;/*the begining of the program to avoid whitespace*/
+		while (*start == ' ' || *start == '\t')
+			start++;
+		end = start + strlen(start) - 1;
+		while (end >= start && (*end == ' ' || *end == '\t'))
+		{
+			*end = '\0';
+			end--;
+		}
+		argv[0] = start;
+		argv[1] = NULL;/*the end of whitespace program*/
+		
 		child = fork();
 		if (child == -1)
 		{
@@ -71,7 +83,7 @@ int main(void)
 			perror(argv[0]);
 			exit(1);
 		}
-		start = line;
+		/*start = line;
 		while (*start == ' ' || *start == '\t')
 			start++;
 		
@@ -82,8 +94,7 @@ int main(void)
 			end--;
 		}
 		argv[0] = start;
-		argv[1] = NULL;
-
+		argv[1] = NULL;*/
 		wait(&status);
 	}
 	free(line);
