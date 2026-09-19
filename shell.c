@@ -147,7 +147,7 @@ int process_line(char *line, char **env, char *program)
  *
  * Return: status last command
  */
-int main(void)
+int main(int argc, char **argv, char **env)
 {
 	char *line = NULL;
 	size_t len = 0;
