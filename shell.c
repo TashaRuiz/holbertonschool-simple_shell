@@ -11,9 +11,10 @@ int main(void)
 	ssize_t read;
 	pid_t child;
 	int status;
-	char *argv[64];
+	char *argv[2];
+	/*char *argv[64];
 	char *token;
-	int argc = 0;
+	int argc = 0;*/
 
 	while (1)
 	{
@@ -24,22 +25,25 @@ int main(void)
 	
 		if (read == -1)
 		{
-			free(line);
+			//free(line);
 
 			if (isatty(STDIN_FILENO))
 				write(STDOUT_FILENO, "\n", 1);
+			free(line);
 			return (0);
 		}
 
 		if (read > 0 && line[read - 1] == '\n')
 			line[read - 1] = '\0';
-		/*if(line[0] == '\0')
+		if(line[0] == '\0')
 			continue;
 
-		argv[0] = line;
-		argv[1] = NULL;*/
+		argv[0] = strtok(line, "\t");
+		argv[1] = NULL;
 	
-		token = strtok(line, " \t");
+		if (argv[0] == NULL)
+			continue;
+		/*token = strtok(line, " \t");
 		while (token != NULL && argc < 63)
 		{
 			argv[argc] = token;
@@ -49,7 +53,7 @@ int main(void)
 		argv[argc] = NULL;
 
 		if (argc == 0)
-			continue;
+			continue;*/
 	
 		child = fork();
 		if (child == -1)
