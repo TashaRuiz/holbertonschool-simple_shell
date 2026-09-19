@@ -14,8 +14,6 @@ int main(void)
 	char *argv[64];
 	char *token;
 	int argc = 0;
-	char *start;
-	char *end;
 
 	while (1)
 	{
