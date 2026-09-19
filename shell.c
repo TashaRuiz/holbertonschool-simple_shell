@@ -21,14 +21,12 @@ int main(void)
 	while (1)
 	{
 		if (isatty(STDIN_FILENO))
-			write(STDOUT_FILENO, "$ ", 2);
+			write(STDOUT_FILENO, "$ ", 4);
 	
 		read = getline(&line, &len, stdin);
 	
 		if (read == -1)
 		{
-			free(line);
-
 			if (isatty(STDIN_FILENO))
 				write(STDOUT_FILENO, "\n", 1);
 			/*free(line);*/
@@ -98,5 +96,5 @@ int main(void)
 		wait(&status);
 	}
 	free(line);
-	return (0);
+	return (status);
 }
