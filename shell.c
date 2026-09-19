@@ -25,7 +25,7 @@ int main(void)
 	
 		if (read == -1)
 		{
-			//free(line);
+			/*free(line);*/
 
 			if (isatty(STDIN_FILENO))
 				write(STDOUT_FILENO, "\n", 1);
