@@ -21,24 +21,22 @@ int main(void)
 	{
 		if (isatty(STDIN_FILENO))
 			write(STDOUT_FILENO, "$ ", 2);
-
+	
 		read = getline(&line, &len, stdin);
-
+	
 		if (read == -1)
 		{
 			free(line);
+
 			if (isatty(STDIN_FILENO))
 				write(STDOUT_FILENO, "\n", 1);
 			return (0);
 		}
+
 		if (read > 0 && line[read - 1] == '\n')
 			line[read - 1] = '\0';
-
-		if (line[0] == '\0')
-			continue;
-
+	
 		token = strtok(line, " \t");
-
 		while (token != NULL && argc < 63)
 		{
 			argv[argc] = token;
@@ -46,26 +44,15 @@ int main(void)
 			token = strtok(NULL, " \t");
 		}
 		argv[argc] = NULL;
+
+		if (argc == 0)
+			continue;
 	
-		start = line;/*the begining of the program to avoid whitespace*/
-		while (*start == ' ' || *start == '\t')
-			start++;
-
-		end = start + strlen(start) - 1;
-
-		while (end >= start && (*end == ' ' || *end == '\t'))
-		{
-			*end = '\0';
-			end--;
-		}
-		argv[0] = start;
-		argv[1] = NULL;/*the end of whitespace program*/
-
 		child = fork();
-
 		if (child == -1)
 		{
 			perror("./hsh");
+			free(line);
 			return (1);
 		}
 
@@ -74,9 +61,10 @@ int main(void)
 			execve(argv[0], argv, environ);
 			perror(argv[0]);
 			exit(1);
-			
 		}
 		wait(&status);
 	}
+	free(line);
 	return (0);
 }
+
