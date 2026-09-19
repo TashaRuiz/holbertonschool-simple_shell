@@ -14,6 +14,8 @@ int main(void)
 	/*char *argv[2];*/
 	char *argv[64];
 	char *token;
+	char *start;
+	char *end;
 	int argc = 0;
 
 	while (1)
@@ -69,9 +71,21 @@ int main(void)
 			perror(argv[0]);
 			exit(1);
 		}
+		start = line;
+		while (*start == ' ' || *start == '\t')
+			start++;
+		
+		end = start + strlen(start) - 1;
+		while (end >= start && (*end == ' ' || *end == '\t'))
+		{
+			*end = '\0';
+			end--;
+		}
+		argv[0] = start;
+		argv[1] = NULL;
+
 		wait(&status);
 	}
 	free(line);
 	return (0);
 }
-
