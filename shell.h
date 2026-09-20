@@ -72,5 +72,5 @@ char *string_duplicate(char *str);
 char *find_character(char *str, char character);
 int string_compare(char *s1, char *s2);
 char *read_line(void);
-
+int string_to_int(char *str);
 #endif
