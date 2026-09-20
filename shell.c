@@ -29,9 +29,10 @@ char *get_path(char **env)
 char *find_command(char *command, char **env)
 {
 	char *path;
-	char *copy;
-	char *dir;
+	char *start;
+	char *end;
 	char *full;
+	int length;
 
 	if (command == NULL)
 		return (NULL);
@@ -45,28 +46,29 @@ char *find_command(char *command, char **env)
 	}
 
 	path = get_path(env);
-
 	if (path == NULL || *path == '\0')
 		return (NULL);
 
-	copy = string_duplicate(path);
-	if (copy == NULL)
-		return (NULL);
-
-	dir = strtok(copy, ":");
-
-	while (dir != NULL)
+	start = path;
+	while (*start != '\0')
 	{
-		full = build_path(dir, command);
-
-		if (full != NULL)
+		end = start;
+		while (*end != ':' && *end != '\0')
 		{
-			free(copy);
-			return (full);
+			end++;
 		}
-		dir = strtok(NULL, ":");
+
+		length = end - start;
+		if (length > 0)
+		{
+			full = build_path(start, command);
+			if (full != NULL)
+				return (full);
+		}
+		if (*end == '\0')
+			break;
+		start = end + 1;
 	}
-	free(copy);
 	return (NULL);
 }
 /**
