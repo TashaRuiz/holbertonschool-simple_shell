@@ -62,7 +62,6 @@ void split_line(char *line, char **args)
 		start = end;
 	}
 	args[count] = NULL;
-	return (count);
 }
 /**
  * print_env - prints the environment
