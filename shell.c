@@ -53,13 +53,14 @@ char *find_command(char *command, char **env)
 	while (*start != '\0')
 	{
 		end = start;
+		if (*end == '\0')
+			break;
+
+		start = end + 1;
 		while (*end != ':' && *end != '\0')
 		{
 			end++;
 		}
-		if (*end == '\0')
-			break;
-		start = end + 1;
 		/*length = end - start;*/
 		if (length > 0)
 		{
