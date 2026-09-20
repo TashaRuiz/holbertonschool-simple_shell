@@ -68,4 +68,9 @@ int execute_command(char **args, char **env, char *program);
  * Return: 1 to exit shell, 0 otherwise
  */
 int process_line(char *line, char **env, char *program);
+char *string_duplicate(char *str);
+char *find_character(char *str, char character);
+int string_compare(char *s1, char *s2);
+char *read_line(void);
+
 #endif
