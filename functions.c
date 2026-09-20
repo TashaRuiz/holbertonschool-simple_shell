@@ -39,11 +39,11 @@ void split_line(char *line, char **args)
 
 	while (*start != '\0' && count < 63)
 	{
-		while (*start == ' ' || *start == '\t')
-			start++;
-
 		if (*start == '\0')
 			break;
+
+		while (*start == ' ' || *start == '\t')
+			start++;
 
 		end = start;
 
