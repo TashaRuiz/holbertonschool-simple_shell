@@ -28,15 +28,15 @@ char *get_path(char **env)
  */
 char *find_command(char *command, char **env)
 {
-	char *path, *copy, *dir, *full;
+	char *path; *copy; *dir; *full;
 
 	if (command == NULL)
 		return (NULL);
 
-	if (strchr(command, '/'))
+	if (find_character(command, '/') != NULL)
 	{
 		if (access(command, X_OK) == 0)
-			return (strdup(command));
+			return (string_duplicate(command));
 
 		return (NULL);
 	}
@@ -46,7 +46,7 @@ char *find_command(char *command, char **env)
 	if (path == NULL || *path == '\0')
 		return (NULL);
 
-	copy = strdup(path);
+	copy = string_duplicate(path);
 	if (copy == NULL)
 		return (NULL);
 
@@ -61,7 +61,6 @@ char *find_command(char *command, char **env)
 			free(copy);
 			return (full);
 		}
-
 		dir = strtok(NULL, ":");
 	}
 	free(copy);
@@ -86,7 +85,7 @@ int execute_command(char **args, char **env, char *program)
 	if (command == NULL)
 	{
 		fprintf(stderr, "%s: 1: %s: not found\n",
-				program, args[0]);
+			program, args[0]);
 		return (127);
 	}
 
@@ -129,10 +128,10 @@ int process_line(char *line, char **env, char *program)
 	if (args[0] == NULL)
 		return (0);
 
-	if (strcmp(args[0], "exit") == 0)
+	if (string_compare(args[0], "exit") == 0)
 		return (-1);
 
-	if (strcmp(args[0], "env") == 0)
+	if (string_compare(args[0], "env") == 0)
 	{
 		print_env(env);
 		return (0);
@@ -149,33 +148,32 @@ int process_line(char *line, char **env, char *program)
  */
 int main(int argc, char **argv, char **env)
 {
-	char *line = NULL;
-	size_t len = 0;
-	ssize_t read;
+	char *line;
 	int status = 0;
 	int result;
-	(void)argc;
 
 	while (1)
 	{
 		if (isatty(STDIN_FILENO))
-			write(STDOUT_FILENO, "$ ", 4);
-	
-		read = getline(&line, &len, stdin);
-	
-		if (read == -1)
+			write(STDOUT_FILENO, "$ ", 2);
+
+		line = read_line();
+
+		if (line == NULL)
 		{
+			if (isatty(STDIN_FILENO))
+				write(STDOUT_FILENO, "\n", 1);
+
 			break;
 		}
-		if (read > 0 && line[read - 1] == '\n')
-			line[read - 1] = '\0';
 
-		result = process_line(line, env, argv [0]);
+		result = process_line(line, env, argv[0]);
+		free(line);
 
 		if (result == -1)
 			break;
+
 		status = result;
 	}
-	free(line);
 	return (status);
 }
