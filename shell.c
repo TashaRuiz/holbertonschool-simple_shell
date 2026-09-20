@@ -57,17 +57,20 @@ char *find_command(char *command, char **env)
 		{
 			end++;
 		}
-
-		length = end - start;
+		if (*end == '\0')
+			break;
+		start = end + 1;
+		/*length = end - start;*/
 		if (length > 0)
 		{
 			full = build_path(start, command);
 			if (full != NULL)
 				return (full);
 		}
-		if (*end == '\0')
+		length = end - start;
+		/*if (*end == '\0')
 			break;
-		start = end + 1;
+		start = end + 1;*/
 	}
 	return (NULL);
 }
