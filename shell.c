@@ -132,7 +132,7 @@ int process_line(char *line, char **env, char *program)
 {
 	char *args[64];
 
-	split_line(line, args);
+	find_command(line, args);
 
 	if (args[0] == NULL)
 		return (0);
