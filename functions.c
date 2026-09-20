@@ -29,20 +29,41 @@ char *build_path(char *dir, char *command)
  * @line: input line
  * @args: array where arguments are stored
  */
-/*void split_line(char *line, char **args)
+void split_line(char *line, char **args)
 {
-	char *token;
-	int i = 0;
+	char *start;
+	char *end;
+	int count = 0;
 
-	token = strtok(line, " \t");
-	while (token != NULL && i < 63)
+	start = line;
+
+	while (*start != '\0' && count < 63)
 	{
-		args[i] = token;
-		i++;
-		token = strtok(NULL, " \t");
+		while (*start == ' ' || *start == '\t')
+			start++;
+
+		if (*start == '\0')
+			break;
+
+		end = start;
+
+		while (*end != '\0' && *end != ' ' && *end != '\t')
+			end++;
+
+		if (*end != '\0')
+		{
+			*end = '\0';
+			end++;
+		}
+
+		args[count] = start;
+		count++;
+
+		start = end;
 	}
-	args[i] = NULL;
-}*/
+	args[count] = NULL;
+	return (count);
+}
 /**
  * print_env - prints the environment
  * @env: environment variables
