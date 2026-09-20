@@ -149,7 +149,7 @@ int process_line(char *line, char **env, char *program)
  *
  * Return: status last command
  */
-int main( char **argv, char **env)
+int main(char **argv, char **env)
 {
 	char *line;
 	int status = 0;
