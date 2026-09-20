@@ -28,7 +28,10 @@ char *get_path(char **env)
  */
 char *find_command(char *command, char **env)
 {
-	char *path; *copy; *dir; *full;
+	char *path;
+	char *copy;
+	char *dir;
+	char *full;
 
 	if (command == NULL)
 		return (NULL);
