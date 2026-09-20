@@ -141,7 +141,7 @@ int process_line(char *line, char **env, char *program, int *exit_shell)
 	{
 		*exit_shell = 1;
 		if (args[1] != NULL)
-			return (atoi(args[1]));
+			return (string_to_int(args[1]));
 		return (0);
 	}
 	if (string_compare(args[0], "env") == 0)
