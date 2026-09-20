@@ -29,7 +29,7 @@ char *build_path(char *dir, char *command)
  * @line: input line
  * @args: array where arguments are stored
  */
-void split_line(char *line, char **args)
+/*void split_line(char *line, char **args)
 {
 	char *token;
 	int i = 0;
@@ -42,7 +42,7 @@ void split_line(char *line, char **args)
 		token = strtok(NULL, " \t");
 	}
 	args[i] = NULL;
-}
+}*/
 /**
  * print_env - prints the environment
  * @env: environment variables
