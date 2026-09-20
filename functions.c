@@ -1,5 +1,31 @@
 #include "shell.h"
 /**
+ * string_to_int - converts a string to an integer
+ * @str: string containing a number
+ *
+ * Return: converted integer
+ */
+int string_to_int(char *str)
+{
+	int number = 0;
+	int sign = 1;
+
+	if (str == NULL)
+		return (0);
+
+	if (*str == '-')
+	{
+		sign = -1;
+		str++;
+	}
+	while (*str >= '0' && *str <= '9')
+	{
+		number = number * 10 + (*str - '0');
+		str++;
+	}
+	return (number * sign);
+}
+/**
  * build_path - builds and checks a command path
  * @dir: directory from PATH
  * @command: command to find
