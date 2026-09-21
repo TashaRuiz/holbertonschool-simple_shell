@@ -192,7 +192,7 @@ int main(int argc, char **argv, char **env)
 			break;
 		}
 
-		result = process_line(line, env, argv[0], &exit_shell, last_status);
+		result = process_line(line, env, argv[0], &exit_shell, status);
 		free(line);
 
 		status = result;
