@@ -80,4 +80,11 @@ int string_to_int(char *str);
  * Return: 1 if number, 0 other
  */
 int is_number(char *str);
+/**
+ * handle_setenv - handles the setenv builtin
+ * @args: command arguments
+ *
+ * Return: 0 on success, 1 on error
+ */
+int handle_setenv(char **args)
 #endif
