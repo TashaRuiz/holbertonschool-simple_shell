@@ -73,4 +73,11 @@ char *find_character(char *str, char character);
 int string_compare(char *s1, char *s2);
 char *read_line(void);
 int string_to_int(char *str);
+/**
+ *is_number - check if a string contains a digits
+ *@str: a string to check
+ *
+ * Return: 1 if number, 0 other
+ */
+int is_number(char *str);
 #endif
