@@ -158,6 +158,10 @@ int process_line(char *line, char **env, char *program, int *exit_shell, int las
 		print_env(env);
 		return (0);
 	}
+	if(string_compare(args[0], "setenv") == 0)
+	{
+		return (handle_setenv(args));
+	}
 	return (execute_command(args, env, program));
 }
 /**
