@@ -50,28 +50,28 @@ char *find_command(char *command, char **env)
 		return (NULL);
 
 	start = path;
-	while (*start != '\0')
+
+	while (1)
 	{
 		end = start;
-		if (*end == '\0')
-			break;
 
-		start = end + 1;
+		/*start = end + 1;*/
 		while (*end != ':' && *end != '\0')
 		{
 			end++;
 		}
-		/*length = end - start;*/
+		
+		length = end - start;
 		if (length > 0)
 		{
 			full = build_path(start, command);
 			if (full != NULL)
 				return (full);
 		}
-		length = end - start;
-		/*if (*end == '\0')
+		
+		if (*end == '\0')
 			break;
-		start = end + 1;*/
+		start = end + 1;
 	}
 	return (NULL);
 }
@@ -152,6 +152,10 @@ int process_line(char *line, char **env, char *program, int *exit_shell, int las
 			return (string_to_int(args[1]));
 		}
 		return (last_status);
+	}
+	if (string_compare(args[0], "setenv") == 0)
+	{
+		return (handle_setenv(args));
 	}
 	if (string_compare(args[0], "env") == 0)
 	{
