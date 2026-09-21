@@ -141,6 +141,9 @@ int process_line(char *line, char **env, char *program, int *exit_shell)
 	{
 		*exit_shell = 1;
 		if (args[1] != NULL)
+			if (args[1][0] == '-')
+				fprintf(stderr, "%s: 1: exit: Illegal number: %s\n, program, args[1]")
+				return (2);
 			return (string_to_int(args[1]));
 		return (0);
 	}
