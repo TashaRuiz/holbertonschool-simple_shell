@@ -50,28 +50,28 @@ char *find_command(char *command, char **env)
 		return (NULL);
 
 	start = path;
-
-	while (1)
+	while (*start != '\0')
 	{
 		end = start;
+		if (*end == '\0')
+			break;
 
-		/*start = end + 1;*/
+		start = end + 1;
 		while (*end != ':' && *end != '\0')
 		{
 			end++;
 		}
-		
-		length = end - start;
+		/*length = end - start;*/
 		if (length > 0)
 		{
 			full = build_path(start, command);
 			if (full != NULL)
 				return (full);
 		}
-		
-		if (*end == '\0')
-			break;
-		start = end + 1;
+		length = end - start;
+		/*if (*end == '\0')
+		  break;
+		  start = end + 1;*/
 	}
 	return (NULL);
 }
@@ -94,7 +94,7 @@ int execute_command(char **args, char **env, char *program)
 	if (command == NULL)
 	{
 		fprintf(stderr, "%s: 1: %s: not found\n",
-			program, args[0]);
+				program, args[0]);
 		return (127);
 	}
 
@@ -128,7 +128,7 @@ int execute_command(char **args, char **env, char *program)
  *
  * Return: command status, or -1 to exit shell
  */
-int process_line(char *line, char **env, char *program, int *exit_shell, int last_status)
+int process_line(char *line, char **env, char *program)
 {
 	char *args[64];
 
@@ -138,25 +138,8 @@ int process_line(char *line, char **env, char *program, int *exit_shell, int las
 		return (0);
 
 	if (string_compare(args[0], "exit") == 0)
-	{
-		*exit_shell = 1;
-		if (args[1] != NULL)
-		{
-			if (!is_number(args[1])) /*verifica si no es un numeros pues entra a verificar si es un special char*/
-			{
-				fprintf(stderr,
-					"%s: 1: exit: Illegal number: %s\n",
-					program, args[1]);
-				return (2);
-			}
-			return (string_to_int(args[1]));
-		}
-		return (last_status);
-	}
-	if (string_compare(args[0], "setenv") == 0)
-	{
-		return (handle_setenv(args));
-	}
+		return (-1);
+
 	if (string_compare(args[0], "env") == 0)
 	{
 		print_env(env);
@@ -177,7 +160,6 @@ int main(int argc, char **argv, char **env)
 	char *line;
 	int status = 0;
 	int result;
-	int exit_shell = 0;
 
 	(void)argc;
 
@@ -196,13 +178,13 @@ int main(int argc, char **argv, char **env)
 			break;
 		}
 
-		result = process_line(line, env, argv[0], &exit_shell, status);
+		result = process_line(line, env, argv[0]);
 		free(line);
 
-		status = result;
-
-		if (exit_shell)
+		if (result == -1)
 			break;
+
+		status = result;
 	}
 	return (status);
 }
