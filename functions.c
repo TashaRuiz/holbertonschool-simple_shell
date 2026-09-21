@@ -1,5 +1,29 @@
 #include "shell.h"
 /**
+ * handle_setenv - handles the setenv builtin
+ * @args: command arguments
+ *
+ * Return: 0 on success, 1 on error
+ */
+int handle_setenv(char **args)
+{
+	if (args[1] == NULL)
+		return (1);
+
+	if (args[2] == NULL)
+	{
+		if (setenv(args[1], "", 1) == -1)
+			return (1);
+
+		return (0);
+	}
+
+	if (setenv(args[1], args[2], 1) == -1)
+		return (1);
+
+	return (0);
+}
+/**
  * string_to_int - converts a string to an integer
  * @str: string containing a number
  *
