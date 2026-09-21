@@ -142,7 +142,7 @@ int process_line(char *line, char **env, char *program, int *exit_shell, int las
 		*exit_shell = 1;
 		if (args[1] != NULL)
 		{
-			if (args[1][0] == '-')
+			if (!is_number(args[1])) /*verifica si no es un numeros pues entra a verificar si es un special char*/
 			{
 				fprintf(stderr,
 					"%s: 1: exit: Illegal number: %s\n",
