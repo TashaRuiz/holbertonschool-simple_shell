@@ -128,7 +128,7 @@ int execute_command(char **args, char **env, char *program)
  *
  * Return: command status, or -1 to exit shell
  */
-int process_line(char *line, char **env, char *program, int *exit_shell)
+int process_line(char *line, char **env, char *program, int *exit_shell, int last_status)
 {
 	char *args[64];
 
@@ -151,7 +151,7 @@ int process_line(char *line, char **env, char *program, int *exit_shell)
 			}
 			return (string_to_int(args[1]));
 		}
-		return (0);
+		return (last_status);
 	}
 	if (string_compare(args[0], "env") == 0)
 	{
@@ -192,7 +192,7 @@ int main(int argc, char **argv, char **env)
 			break;
 		}
 
-		result = process_line(line, env, argv[0], &exit_shell);
+		result = process_line(line, env, argv[0], &exit_shell, last_status);
 		free(line);
 
 		status = result;
