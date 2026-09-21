@@ -128,7 +128,7 @@ int execute_command(char **args, char **env, char *program)
  *
  * Return: command status, or -1 to exit shell
  */
-int process_line(char *line, char **env, char *program)
+int process_line(char *line, char **env, char *program, int *exit_shell, int last_status)
 {
 	char *args[64];
 
@@ -138,8 +138,21 @@ int process_line(char *line, char **env, char *program)
 		return (0);
 
 	if (string_compare(args[0], "exit") == 0)
-		return (-1);
-
+	{
+		*exit_shell = 1;
+		if (args[1] != NULL)
+		{
+			if (!is_number(args[1])) /*verifica si no es un numeros pues entra a verificar si es un special char*/
+			{
+				fprintf(stderr,
+						"%s: 1: exit: Illegal number: %s\n",
+						program, args[1]);
+				return (2);
+			}
+			return (string_to_int(args[1]));
+		}
+		return (last_status);
+	}
 	if (string_compare(args[0], "env") == 0)
 	{
 		print_env(env);
@@ -160,6 +173,7 @@ int main(int argc, char **argv, char **env)
 	char *line;
 	int status = 0;
 	int result;
+	int exit_shell = 0;
 
 	(void)argc;
 
@@ -178,13 +192,13 @@ int main(int argc, char **argv, char **env)
 			break;
 		}
 
-		result = process_line(line, env, argv[0]);
+		result = process_line(line, env, argv[0], &exit_shell, status);
 		free(line);
 
-		if (result == -1)
-			break;
-
 		status = result;
+
+		if (exit_shell)
+			break;
 	}
 	return (status);
 }
