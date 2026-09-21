@@ -26,6 +26,25 @@ int string_to_int(char *str)
 	return (number * sign);
 }
 /**
+ * is_number - checks if a string contains only digits
+ * @str: string to check
+ *
+ * Return: 1 if number, 0 otherwise
+ */
+int is_number(char *str)
+{
+	int i;
+
+	if (str == NULL || *str == '\0')
+		return (0);
+	for (i = 0; str[i] != '\0'; i++)
+	{
+		if (str[i] < '0' || str[i] > '9')
+			return (0);
+	}
+	return (1);
+}
+/**
  * build_path - builds and checks a command path
  * @dir: directory from PATH
  * @command: command to find
