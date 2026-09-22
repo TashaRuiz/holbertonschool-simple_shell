@@ -86,5 +86,5 @@ int is_number(char *str);
  *
  * Return: 0 on success, 1 on error
  */
-int handle_setenv(char **args)
+int handle_setenv(char **args);
 #endif
