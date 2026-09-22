@@ -1,5 +1,57 @@
 #include "shell.h"
 /**
+ * handle_unsetenv - removes an environment variable
+ * @args: command arguments
+ * @env: pointer to environment
+ *
+ * Return: 0 on success, 1 on error
+ */
+int handle_unsetenv(char **args, char ***env)
+{
+	char **new_env;
+	int count;
+	int i;
+	int j;
+	int name_len;
+
+	if (args[1] == NULL)
+		return (1);
+
+	name_len = string_length(args[1]);
+	count = 0;
+
+	while ((*env)[count] != NULL)
+		count++;
+
+	new_env = malloc(sizeof(char *) * count);
+
+	if (new_env == NULL)
+		return (1);
+
+	j = 0;
+
+	for (i = 0; i < count; i++)
+	{
+		if (string_starts_with((*env)[i], args[1])
+			&& (*env)[i][name_len] == '=')
+		{
+			free((*env)[i]);
+		}
+		else
+		{
+			new_env[j] = (*env)[i];
+			j++;
+		}
+	}
+
+	new_env[j] = NULL;
+
+	free(*env);
+	*env = new_env;
+
+	return (0);
+}
+/**
  * handle_setenv - handles the setenv builtin
  * @args: command arguments
  * @env: pointer to environment
