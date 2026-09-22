@@ -1,5 +1,26 @@
 #include "shell.h"
 /**
+ * handle_cd - changes the current working directory
+ * @args: command arguments
+ *
+ * Return: 0 on success, 1 on failure
+ */
+int handle_cd(char **args)
+{
+	char *directory;
+
+	directory = args[1];
+	if (directory == NULL)
+		directory = getenv("HOME");
+	
+	if (directory == NULL)
+		return (1);
+
+	if (chdir(directory) == -1)
+		return (1);
+	return (0);
+}
+/**
  * handle_unsetenv - removes an environment variable
  * @args: command arguments
  * @env: pointer to environment
