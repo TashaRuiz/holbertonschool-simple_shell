@@ -23,7 +23,7 @@ int handle_unsetenv(char **args, char ***env)
 	while ((*env)[count] != NULL)
 		count++;
 
-	new_env = malloc(sizeof(char *) * count);
+	new_env = malloc(sizeof(char *) * (count + 1));
 
 	if (new_env == NULL)
 		return (1);
