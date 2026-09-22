@@ -14,7 +14,8 @@ int handle_setenv(char **args, char ***env)
 	char *value;
 	int name_len;
 	int value_len;
-	int i; j;
+	int i;
+	int j;
 
 	if (args[1] == NULL)
 		return (1);
@@ -172,7 +173,8 @@ void free_environment(char **env)
 int add_environment(char *variable, char ***env)
 {
 	char **new_env;
-	int count; i;
+	int count;
+	int i;
 
 	count = 0;
 
