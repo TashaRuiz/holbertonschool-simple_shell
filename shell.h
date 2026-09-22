@@ -15,7 +15,7 @@ void print_env(char **env);
 char *get_path(char **env);
 char *find_command(char *command, char **env);
 int execute_command(char **args, char **env, char *program);
-int process_line(char *line, char **env, char *program, int *exit_shell, int last_status);
+int process_line(char *line, char ***env, char *program, int *exit_shell, int last_status);
 char *string_duplicate(char *str);
 char *find_character(char *str, char character);
 int string_compare(char *s1, char *s2);
