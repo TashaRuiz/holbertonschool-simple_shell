@@ -86,5 +86,7 @@ int is_number(char *str);
  *
  * Return: 0 on success, 1 on error
  */
-int handle_setenv(char **args);
+int handle_setenv(char **args, char ***env);
+int string_length(char *str);
+int string_starts_with(char *str, char *prefix);
 #endif
