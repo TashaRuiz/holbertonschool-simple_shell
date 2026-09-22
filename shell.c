@@ -50,28 +50,29 @@ char *find_command(char *command, char **env)
 		return (NULL);
 
 	start = path;
-	while (*start != '\0')
+	/*while (*start != '\0')*/
+	while (1)
 	{
 		end = start;
-		if (*end == '\0')
+		/*if (*end == '\0')
 			break;
 
-		start = end + 1;
+		start = end + 1;*/
 		while (*end != ':' && *end != '\0')
 		{
 			end++;
 		}
-		/*length = end - start;*/
+		length = end - start;
 		if (length > 0)
 		{
 			full = build_path(start, command);
 			if (full != NULL)
 				return (full);
 		}
-		length = end - start;
-		/*if (*end == '\0')
+		/*length = end - start;*/
+		if (*end == '\0')
 		  break;
-		  start = end + 1;*/
+		  start = end + 1;
 	}
 	return (NULL);
 }
@@ -128,7 +129,7 @@ int execute_command(char **args, char **env, char *program)
  *
  * Return: command status, or -1 to exit shell
  */
-int process_line(char *line, char **env, char *program, int *exit_shell, int last_status)
+int process_line(char *line, char ***env, char *program, int *exit_shell, int last_status)
 {
 	char *args[64];
 
@@ -155,14 +156,14 @@ int process_line(char *line, char **env, char *program, int *exit_shell, int las
 	}
 	if (string_compare(args[0], "env") == 0)
 	{
-		print_env(env);
+		print_env(*env);
 		return (0);
 	}
 	if(string_compare(args[0], "setenv") == 0)
 	{
-		return (handle_setenv(args));
+		return (handle_setenv(args, env));
 	}
-	return (execute_command(args, env, program));
+	return (execute_command(args, *env, program));
 }
 /**
  * main - Simple UNIX command line interpreter
@@ -181,6 +182,10 @@ int main(int argc, char **argv, char **env)
 
 	(void)argc;
 
+	shell_env = copy_environment(env);
+	if (shell_env == NULL)
+		return (1);
+
 	while (1)
 	{
 		if (isatty(STDIN_FILENO))
@@ -196,7 +201,7 @@ int main(int argc, char **argv, char **env)
 			break;
 		}
 
-		result = process_line(line, env, argv[0], &exit_shell, status);
+		result = process_line(line, &shell_env, argv[0], &exit_shell, status);
 		free(line);
 
 		status = result;
@@ -204,5 +209,6 @@ int main(int argc, char **argv, char **env)
 		if (exit_shell)
 			break;
 	}
+	free_environment(shell_env);
 	return (status);
 }
