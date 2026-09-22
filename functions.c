@@ -24,7 +24,7 @@ int handle_setenv(char **args, char ***env)
 	value = args[2];
 
 	if (value == NULL)
-		value = "";
+		return (0);
 
 	name_len = string_length(name);
 	value_len = string_length(value);
