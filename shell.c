@@ -169,6 +169,10 @@ int process_line(char *line, char ***env, char *program, int *exit_shell, int la
 	{
 		return (handle_unsetenv(args, env));
 	}
+	if (string_compare(args[0], "cd") == 0)
+	{
+		return (handle_cd(args));
+	}
 	return (execute_command(args, *env, program));
 }
 /**
