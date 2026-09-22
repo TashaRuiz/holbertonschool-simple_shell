@@ -71,7 +71,9 @@ char *find_command(char *command, char **env)
 		}
 		/*length = end - start;*/
 		if (*end == '\0')
-		  break;
+		{
+			 break;
+		}
 		  start = end + 1;
 	}
 	return (NULL);
@@ -176,6 +178,7 @@ int process_line(char *line, char ***env, char *program, int *exit_shell, int la
 int main(int argc, char **argv, char **env)
 {
 	char *line;
+	char **shell_env;
 	int status = 0;
 	int result;
 	int exit_shell = 0;
