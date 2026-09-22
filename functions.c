@@ -2,24 +2,203 @@
 /**
  * handle_setenv - handles the setenv builtin
  * @args: command arguments
+ * @env: pointer to environment
  *
  * Return: 0 on success, 1 on error
  */
-int handle_setenv(char **args)
+int handle_setenv(char **args, char ***env)
 {
+	char *new_variable;
+	char *old_variable;
+	char *name;
+	char *value;
+	int name_len;
+	int value_len;
+	int i; j;
+
 	if (args[1] == NULL)
 		return (1);
 
-	if (args[2] == NULL)
-	{
-		if (setenv(args[1], "", 1) == -1)
-			return (1);
+	name = args[1];
+	value = args[2];
 
+	if (value == NULL)
+		value = "";
+
+	name_len = string_length(name);
+	value_len = string_length(value);
+
+	new_variable = malloc(name_len + value_len + 2);
+
+	if (new_variable == NULL)
+		return (1);
+
+	for (i = 0; i < name_len; i++)
+		new_variable[i] = name[i];
+
+	new_variable[name_len] = '=';
+
+	for (j = 0; j < value_len; j++)
+		new_variable[name_len + 1 + j] = value[j];
+
+	new_variable[name_len + value_len + 1] = '\0';
+
+	for (i = 0; (*env)[i] != NULL; i++)
+	{
+		if (string_starts_with((*env)[i], name)
+			&& (*env)[i][name_len] == '=')
+		{
+			old_variable = (*env)[i];
+			(*env)[i] = new_variable;
+			free(old_variable);
+			return (0);
+		}
+	}
+	i = add_environment(new_variable, env);
+	free(new_variable);
+	return (i);
+}/**
+ * string_length - gets the length of a string
+ * @str: string to measure
+ *
+ * Return: length of string
+ */
+int string_length(char *str)
+{
+	int length;
+
+	if (str == NULL)
 		return (0);
+
+	length = 0;
+
+	while (str[length] != '\0')
+		length++;
+
+	return (length);
+}
+/**
+ * string_starts_with - checks if a string starts with a prefix
+ * @str: string to check
+ * @prefix: prefix to find
+ *
+ * Return: 1 if prefix matches, 0 otherwise
+ */
+int string_starts_with(char *str, char *prefix)
+{
+	int i;
+
+	if (str == NULL || prefix == NULL)
+		return (0);
+
+	i = 0;
+
+	while (prefix[i] != '\0')
+	{
+		if (str[i] != prefix[i])
+			return (0);
+
+		i++;
 	}
 
-	if (setenv(args[1], args[2], 1) == -1)
+	return (1);
+}
+/**
+ * copy_environment - makes a copy of the environment
+ * @env: original environment
+ *
+ * Return: copied environment, or NULL
+ */
+char **copy_environment(char **env)
+{
+	char **copy;
+	int count;
+	int i;
+
+	if (env == NULL)
+		return (NULL);
+
+	count = 0;
+
+	while (env[count] != NULL)
+		count++;
+
+	copy = malloc(sizeof(char *) * (count + 1));
+
+	if (copy == NULL)
+		return (NULL);
+
+	for (i = 0; i < count; i++)
+	{
+		copy[i] = string_duplicate(env[i]);
+
+		if (copy[i] == NULL)
+		{
+			while (i > 0)
+			{
+				i--;
+				free(copy[i]);
+			}
+			free(copy);
+			return (NULL);
+		}
+	}
+	copy[count] = NULL;
+	return (copy);
+}
+/**
+ * free_environment - frees a copied environment
+ * @env: environment to free
+ */
+void free_environment(char **env)
+{
+	int i;
+
+	if (env == NULL)
+		return;
+
+	for (i = 0; env[i] != NULL; i++)
+		free(env[i]);
+
+	free(env);
+}
+/**
+ * add_environment - adds a variable to the environment
+ * @variable: variable to add
+ * @env: pointer to environment
+ *
+ * Return: 0 on success, 1 on failure
+ */
+int add_environment(char *variable, char ***env)
+{
+	char **new_env;
+	int count; i;
+
+	count = 0;
+
+	while ((*env)[count] != NULL)
+		count++;
+
+	new_env = malloc(sizeof(char *) * (count + 2));
+
+	if (new_env == NULL)
 		return (1);
+
+	for (i = 0; i < count; i++)
+		new_env[i] = (*env)[i];
+
+	new_env[count] = string_duplicate(variable);
+
+	if (new_env[count] == NULL)
+	{
+		free(new_env);
+		return (1);
+	}
+	new_env[count + 1] = NULL;
+
+	free(*env);
+
+	*env = new_env;
 
 	return (0);
 }
