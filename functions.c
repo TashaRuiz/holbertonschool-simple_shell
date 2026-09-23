@@ -2,13 +2,51 @@
 /**
  * handle_cd - changes the current working directory
  * @args: command arguments
+ * @env: environment variables
  *
  * Return: 0 on success, 1 on failure
  */
 int handle_cd(char **args, char **env)
 {
 	char *home;
+	char *oldpwd;
+	char *pwd;
 	int i;
+
+	if (args[1] != NULL && string_compare(args[1], "-") == 0)
+	{
+		oldpwd = NULL;
+		pwd = NULL;
+
+		for (i = 0; env[i] != NULL; i++)
+		{
+			if (string_starts_with(env[i], "OLDPWD="))
+				oldpwd = env[i] + 7;
+
+			if (string_starts_with(env[i], "PWD="))
+				pwd = env[i] + 4;
+		}
+		if (oldpwd == NULL)
+		{
+			if (pwd != NULL)
+			{
+				write(STDOUT_FILENO, pwd, string_length(pwd));
+				write(STDOUT_FILENO, "\n", 1);
+			}
+			return (0);
+		}
+		if (chdir(oldpwd) == -1)
+		{
+			fprintf(stderr, "./hsh: 1: cd: can't cd to %s\n",
+				oldpwd);
+			return (1);
+		}
+
+		write(STDOUT_FILENO, oldpwd, string_length(oldpwd));
+		write(STDOUT_FILENO, "\n", 1);
+
+		return (0);
+	}
 
 	if (args[1] != NULL)
 	{
@@ -31,7 +69,6 @@ int handle_cd(char **args, char **env)
 			break;
 		}
 	}
-
 	if (home == NULL)
 		return (1);
 
