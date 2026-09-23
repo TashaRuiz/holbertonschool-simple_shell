@@ -1,5 +1,50 @@
 #include "shell.h"
 /**
+ * update_directory_vars - updates PWD and OLDPWD
+ * @env: environment variables
+ * @oldpwd: previous directory
+ * @newpwd: new directory
+ *
+ * Return: 0 on success, 1 on failure
+ */
+int update_directory_vars(char **env, char *oldpwd, char *newpwd)
+{
+	int i;
+	int old_len;
+	int new_len;
+	char *new_value;
+
+	old_len = string_length(oldpwd);
+	new_len = string_length(newpwd);
+
+	for (i = 0; env[i] != NULL; i++)
+	{
+		if (string_starts_with(env[i], "OLDPWD="))
+		{
+			new_value = malloc(old_len + 8);
+
+			if (new_value == NULL)
+				return (1);
+
+			sprintf(new_value, "OLDPWD=%s", oldpwd);
+			free(env[i]);
+			env[i] = new_value;
+		}
+		if (string_starts_with(env[i], "PWD="))
+		{
+			new_value = malloc(new_len + 5);
+
+			if (new_value == NULL)
+				return (1);
+
+			sprintf(new_value, "PWD=%s", newpwd);
+			free(env[i]);
+			env[i] = new_value;
+		}
+	}
+	return (0);
+}
+/**
  * handle_cd - changes the current working directory
  * @args: command arguments
  * @env: environment variables
