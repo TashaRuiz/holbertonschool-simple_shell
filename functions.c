@@ -90,8 +90,14 @@ int handle_cd(char **args, char **env)
 	else if (string_compare(args[1], "-") == 0)
 	{
 		if (oldpwd == NULL)
+		{
+			if (pwd != NULL)
+			{
+				write(STDOUT_FILENO, pwd, string_length(pwd));
+				write(STDOUT_FILENO, "\n", 1);
+			}
 			return (0);
-
+		}
 		target = string_duplicate(oldpwd);
 	}
 	/* cd with a directory */
