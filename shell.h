@@ -29,5 +29,5 @@ char **copy_environment(char **env);
 void free_environment(char **env);
 int add_environment(char *variable, char ***env);
 int handle_unsetenv(char **args, char ***env);
-int handle_cd(char **args);
+int handle_cd(char **args, char **env);
 #endif
