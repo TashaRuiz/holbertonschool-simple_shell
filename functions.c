@@ -56,21 +56,27 @@ int handle_cd(char **args, char **env)
 	char *home;
 	char *oldpwd;
 	char *pwd;
+	char *target;
 	int i;
 
+	home = NULL;
+	oldpwd = NULL;
+	pwd = NULL;
+
+	for (i = 0; env[i] != NULL; i++)
+	{
+		if (string_starts_with(env[i], "HOME="))
+			home = env[i] + 5;
+		if (string_starts_with(env[i], "OLDPWD="))
+			oldpwd = env[i] + 7;
+		if (string_starts_with(env[i], "PWD="))
+			pwd = env[i] + 4;
+	}
+	/*
+	 * cd -
+	 */
 	if (args[1] != NULL && string_compare(args[1], "-") == 0)
 	{
-		oldpwd = NULL;
-		pwd = NULL;
-
-		for (i = 0; env[i] != NULL; i++)
-		{
-			if (string_starts_with(env[i], "OLDPWD="))
-				oldpwd = env[i] + 7;
-
-			if (string_starts_with(env[i], "PWD="))
-				pwd = env[i] + 4;
-		}
 		if (oldpwd == NULL)
 		{
 			if (pwd != NULL)
@@ -87,12 +93,19 @@ int handle_cd(char **args, char **env)
 			return (1);
 		}
 
-		write(STDOUT_FILENO, oldpwd, string_length(oldpwd));
+		target = oldpwd;
+
+		if (update_directory_vars(env, pwd, target) != 0)
+			return (1);
+
+		write(STDOUT_FILENO, target, string_length(target));
 		write(STDOUT_FILENO, "\n", 1);
 
 		return (0);
 	}
-
+	/*
+	 * cd with an argument
+	 */
 	if (args[1] != NULL)
 	{
 		if (chdir(args[1]) == -1)
@@ -101,27 +114,23 @@ int handle_cd(char **args, char **env)
 				args[1]);
 			return (1);
 		}
+		if (update_directory_vars(env, pwd, args[1]) != 0)
+			return (1);
 		return (0);
 	}
-
-	home = NULL;
-
-	for (i = 0; env[i] != NULL; i++)
-	{
-		if (string_starts_with(env[i], "HOME="))
-		{
-			home = env[i] + 5;
-			break;
-		}
-	}
+	/*
+	 * cd with no argument
+	 */
 	if (home == NULL)
 		return (1);
-
 	if (chdir(home) == -1)
 	{
-		fprintf(stderr, "./hsh: 1: cd: can't cd to %s\n", home);
+		fprintf(stderr, "./hsh: 1: cd: can't cd to %s\n",
+			home);
 		return (1);
 	}
+	if (update_directory_vars(env, pwd, home) != 0)
+		return (1);
 	return (0);
 }
 /**
