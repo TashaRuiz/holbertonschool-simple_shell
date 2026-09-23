@@ -105,26 +105,11 @@ int handle_cd(char **args, char **env)
 	}
 	if (chdir(target) == -1)
 	{
-		fprintf(stderr, "%s: 1: cd: can't cd to %s\n", "./hsh", target);
+		fprintfstderr, "%s: 1: cd: can't cd to %s\n",
+                        "./hsh", target);
 		return (1);
 	}
 	if (update_directory_vars(env, pwd, target) != 0)
-		return (1);
-
-	return (0);
-}
-	/*
-	 * cd with no argument
-	 */
-	if (home == NULL)
-		return (1);
-	if (chdir(home) == -1)
-	{
-		fprintf(stderr, "./hsh: 1: cd: can't cd to %s\n",
-			home);
-		return (1);
-	}
-	if (update_directory_vars(env, pwd, home) != 0)
 		return (1);
 	return (0);
 }
