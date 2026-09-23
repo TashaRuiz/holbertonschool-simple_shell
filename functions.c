@@ -125,9 +125,8 @@ int handle_cd(char **args, char **env)
 		free(target);
 		return (1);
     }
-	if (update_directory_vars(env, pwd, old_directory, target) != 0)
+	if (update_directory_vars(env, pwd, target) != 0)
 	{
-		free(old_directory);
 		free(target);
 		return (1);
 	}
