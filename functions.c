@@ -55,11 +55,13 @@ int handle_cd(char **args, char **env)
 {
 	char *home;
 	char *oldpwd;
+	char *old_directory;
 	char *pwd;
 	char *target;
 	int i;
 
 	home = NULL;
+	old_directory = NULL;
 	oldpwd = NULL;
 	pwd = NULL;
 
@@ -74,6 +76,13 @@ int handle_cd(char **args, char **env)
 		if (string_starts_with(env[i], "PWD="))
 			pwd = env[i] + 4;
     }
+	if (pwd != NULL)
+	{
+		old_directory = string_duplicate(pwd);
+
+		if (old_directory == NULL)
+			return (1);
+	}
 	/*
 	 * cd with no argument
 	 */
@@ -112,11 +121,13 @@ int handle_cd(char **args, char **env)
 	if (chdir(target) == -1)
 	{
 		fprintf(stderr, "./hsh: 1: cd: can't cd to %s\n", target);
+		free(old_directory);
 		free(target);
 		return (1);
     }
-	if (update_directory_vars(env, pwd, target) != 0)
+	if (update_directory_vars(env, old_directory, target) != 0)
 	{
+		free(old_directory);
 		free(target);
 		return (1);
 	}
