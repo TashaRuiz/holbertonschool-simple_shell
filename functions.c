@@ -13,7 +13,11 @@ int handle_cd(char **args, char **env)
 	if (args[1] != NULL)
 	{
 		if (chdir(args[1]) == -1)
+		{
+			fprintf(stderr, "./hsh: 1: cd: can't cd to %s\n",
+				args[1]);
 			return (1);
+		}
 		return (0);
 	}
 
@@ -27,11 +31,15 @@ int handle_cd(char **args, char **env)
 			break;
 		}
 	}
+
 	if (home == NULL)
 		return (1);
 
 	if (chdir(home) == -1)
+	{
+		fprintf(stderr, "./hsh: 1: cd: can't cd to %s\n", home);
 		return (1);
+	}
 	return (0);
 }
 /**
