@@ -87,19 +87,45 @@ int handle_cd(char **args, char **env)
 	/*
 	 * cd -
 	 */
-	else if (string_compare(args[1], "-") == 0)
+	if (args[1] != NULL && string_compare(args[1], "-") == 0)
 	{
 		if (oldpwd == NULL)
-			 return (1);
+		{
+			if (pwd != NULL)
+			{
+				write(STDOUT_FILENO, pwd, string_length(pwd));
+				write(STDOUT_FILENO, "\n", 1);
+            }
+			return (0);
+        }
 
-		target = oldpwd;
+		target = string_duplicate(oldpwd);
+
+		if (target == NULL)
+			return (1);
+
+		if (chdir(target) == -1)
+		{
+			fprintf(stderr, "./hsh: 1: cd: can't cd to %s\n", target);
+			free(target);
+			return (1);
+        }
+		if (update_directory_vars(env, pwd, target) != 0)
+		{
+			free(target);
+			return (1);
+		}
+
 		write(STDOUT_FILENO, target, string_length(target));
 		write(STDOUT_FILENO, "\n", 1);
-    }
+
+		free(target);
+	}
+	return (0);
 	/*
 	 * cd DIRECTORY
 	 */
-	else
+	/*else
 	{
 		target = args[1];
 	}
@@ -110,7 +136,7 @@ int handle_cd(char **args, char **env)
 	}
 	if (update_directory_vars(env, pwd, target) != 0)
 		return (1);
-	return (0);
+	return (0);*/
 }
 /**
  * handle_unsetenv - removes an environment variable
