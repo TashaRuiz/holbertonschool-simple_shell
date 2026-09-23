@@ -82,45 +82,45 @@ int handle_cd(char **args, char **env)
 		if (home == NULL)
 			return (1);
 
-		target = home;
+		target = string_duplicate(home);
     }
 	/*
 	 * cd -
 	 */
-	if (args[1] != NULL && string_compare(args[1], "-") == 0)
+	else if (string_compare(args[1], "-") == 0)
 	{
 		if (oldpwd == NULL)
-		{
-			if (pwd != NULL)
-			{
-				write(STDOUT_FILENO, pwd, string_length(pwd));
-				write(STDOUT_FILENO, "\n", 1);
-            }
 			return (0);
-        }
 
 		target = string_duplicate(oldpwd);
+	}
+	/* cd with a directory */
+	else
+	{
+		target = string_duplicate(args[1]);
+	}
 
-		if (target == NULL)
-			return (1);
+	if (target == NULL)
+		return (1);
 
-		if (chdir(target) == -1)
-		{
-			fprintf(stderr, "./hsh: 1: cd: can't cd to %s\n", target);
-			free(target);
-			return (1);
-        }
-		if (update_directory_vars(env, pwd, target) != 0)
-		{
-			free(target);
-			return (1);
-		}
-
+	if (chdir(target) == -1)
+	{
+		fprintf(stderr, "./hsh: 1: cd: can't cd to %s\n", target);
+		free(target);
+		return (1);
+    }
+	if (update_directory_vars(env, pwd, target) != 0)
+	{
+		free(target);
+		return (1);
+	}
+	if (args[1] != NULL && string_compare(args[1], "-") == 0)
+	{
 		write(STDOUT_FILENO, target, string_length(target));
 		write(STDOUT_FILENO, "\n", 1);
-
-		free(target);
 	}
+	free(target);
+	
 	return (0);
 	/*
 	 * cd DIRECTORY
