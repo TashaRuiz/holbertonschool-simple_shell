@@ -105,8 +105,7 @@ int handle_cd(char **args, char **env)
 	}
 	if (chdir(target) == -1)
 	{
-		fprintfstderr, "%s: 1: cd: can't cd to %s\n",
-                        "./hsh", target);
+		fprintf(stderr, "%s: 1: cd: can't cd to %s\n", "./hsh", target);
 		return (1);
 	}
 	if (update_directory_vars(env, pwd, target) != 0)
