@@ -480,11 +480,11 @@ void split_line(char *line, char **args)
 
 	while (*start != '\0' && count < 63)
 	{
-		if (*start == '\0')
-			break;
-
 		while (*start == ' ' || *start == '\t')
 			start++;
+
+		if (*start == '\0')
+			break;
 
 		end = start;
 
@@ -496,10 +496,8 @@ void split_line(char *line, char **args)
 			*end = '\0';
 			end++;
 		}
-
 		args[count] = start;
 		count++;
-
 		start = end;
 	}
 	args[count] = NULL;
