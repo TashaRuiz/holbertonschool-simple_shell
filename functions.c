@@ -5,18 +5,32 @@
  *
  * Return: 0 on success, 1 on failure
  */
-int handle_cd(char **args)
+int handle_cd(char **args, char **env)
 {
-	char *directory;
+	char *home;
+	int i;
 
-	directory = args[1];
-	if (directory == NULL)
-		directory = getenv("HOME");
-	
-	if (directory == NULL)
+	if (args[1] != NULL)
+	{
+		if (chdir(args[1]) == -1)
+			return (1);
+		return (0);
+	}
+
+	home = NULL;
+
+	for (i = 0; env[i] != NULL; i++)
+	{
+		if (string_starts_with(env[i], "HOME="))
+		{
+			home = env[i] + 5;
+			break;
+		}
+	}
+	if (home == NULL)
 		return (1);
 
-	if (chdir(directory) == -1)
+	if (chdir(home) == -1)
 		return (1);
 	return (0);
 }
