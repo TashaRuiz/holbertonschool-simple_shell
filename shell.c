@@ -206,8 +206,8 @@ int main(int argc, char **argv, char **env)
 
 		if (line == NULL)
 		{
-			if (isatty(STDIN_FILENO))
-				write(STDOUT_FILENO, "\n", 1);
+			/*if (isatty(STDIN_FILENO))
+				write(STDOUT_FILENO, "\n", 1);*/
 
 			break;
 		}
