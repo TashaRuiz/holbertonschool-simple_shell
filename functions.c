@@ -84,38 +84,34 @@ int handle_cd(char **args, char **env)
 				write(STDOUT_FILENO, pwd, string_length(pwd));
 				write(STDOUT_FILENO, "\n", 1);
 			}
+
 			return (0);
 		}
-		if (chdir(oldpwd) == -1)
+
+		target = string_duplicate(oldpwd);
+
+		if (target == NULL)
+			return (1);
+
+		if (chdir(target) == -1)
 		{
 			fprintf(stderr, "./hsh: 1: cd: can't cd to %s\n",
-				oldpwd);
+				target);
+			free(target);
 			return (1);
 		}
 
-		target = oldpwd;
-
 		if (update_directory_vars(env, pwd, target) != 0)
+		{
+			free(target);
 			return (1);
+		}
 
 		write(STDOUT_FILENO, target, string_length(target));
 		write(STDOUT_FILENO, "\n", 1);
 
-		return (0);
-	}
-	/*
-	 * cd with an argument
-	 */
-	if (args[1] != NULL)
-	{
-		if (chdir(args[1]) == -1)
-		{
-			fprintf(stderr, "./hsh: 1: cd: can't cd to %s\n",
-				args[1]);
-			return (1);
-		}
-		if (update_directory_vars(env, pwd, args[1]) != 0)
-			return (1);
+		free(target);
+
 		return (0);
 	}
 	/*
