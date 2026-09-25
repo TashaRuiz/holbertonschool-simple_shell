@@ -25,7 +25,6 @@ int update_directory_vars(char **env, char *oldpwd, char *newpwd)
 		if (string_starts_with(env[i], "OLDPWD="))
 		{
 			new_value = malloc(old_len + 8);
-
 			if (new_value == NULL)
 				return (1);
 
@@ -36,7 +35,6 @@ int update_directory_vars(char **env, char *oldpwd, char *newpwd)
 		else if (string_starts_with(env[i], "PWD="))
 		{
 			new_value = malloc(new_len + 5);
-
 			if (new_value == NULL)
 				return (1);
 
@@ -80,7 +78,7 @@ int handle_cd(char **args, char **env)
 		if (string_starts_with(env[i], "PWD="))
 			pwd = env[i] + 4;
 	}
-	/* cd with no argument */
+	/* cd */
 	if (args[1] == NULL)
 	{
 		if (home == NULL)
@@ -107,10 +105,12 @@ int handle_cd(char **args, char **env)
 	{
 		target = string_duplicate(args[1]);
 	}
+
 	if (target == NULL)
 		return (1);
+
 	/*
-	 * Save the old directory before changing it.
+	 * Save the current PWD BEFORE chdir().
 	 */
 	if (pwd != NULL)
 	{
@@ -122,7 +122,9 @@ int handle_cd(char **args, char **env)
 			return (1);
 		}
 	}
-	/* Change directory */
+	/*
+	 * Change directory.
+	 */
 	if (chdir(target) == -1)
 	{
 		fprintf(stderr, "./hsh: 1: cd: can't cd to %s\n", target);
@@ -130,20 +132,24 @@ int handle_cd(char **args, char **env)
 		free(target);
 		return (1);
 	}
-	/* Update PWD and OLDPWD */
+	/*
+	 * OLD PWD gets the directory we were in.
+	 * PWD gets the directory we moved to.
+	 */
 	if (update_directory_vars(env, old_directory, target) != 0)
 	{
 		free(old_directory);
 		free(target);
 		return (1);
 	}
-	/* cd - prints the new directory */
+	/*
+	 * cd - prints the directory it changed to.
+	 */
 	if (args[1] != NULL && string_compare(args[1], "-") == 0)
 	{
 		write(STDOUT_FILENO, target, string_length(target));
 		write(STDOUT_FILENO, "\n", 1);
 	}
-	/* IMPORTANT: free both allocations */
 	free(old_directory);
 	free(target);
 
