@@ -25,6 +25,7 @@ int update_directory_vars(char **env, char *oldpwd, char *newpwd)
 		if (string_starts_with(env[i], "OLDPWD="))
 		{
 			new_value = malloc(old_len + 8);
+
 			if (new_value == NULL)
 				return (1);
 
@@ -35,6 +36,7 @@ int update_directory_vars(char **env, char *oldpwd, char *newpwd)
 		else if (string_starts_with(env[i], "PWD="))
 		{
 			new_value = malloc(new_len + 5);
+
 			if (new_value == NULL)
 				return (1);
 
@@ -71,13 +73,12 @@ int handle_cd(char **args, char **env)
 	{
 		if (string_starts_with(env[i], "HOME="))
 			home = env[i] + 5;
-
-		if (string_starts_with(env[i], "OLDPWD="))
+		else if (string_starts_with(env[i], "OLDPWD="))
 			oldpwd = env[i] + 7;
-
-		if (string_starts_with(env[i], "PWD="))
+		else if (string_starts_with(env[i], "PWD="))
 			pwd = env[i] + 4;
 	}
+
 	/* cd */
 	if (args[1] == NULL)
 	{
@@ -98,6 +99,7 @@ int handle_cd(char **args, char **env)
 			}
 			return (0);
 		}
+
 		target = string_duplicate(oldpwd);
 	}
 	/* cd DIRECTORY */
@@ -110,7 +112,7 @@ int handle_cd(char **args, char **env)
 		return (1);
 
 	/*
-	 * Save the current PWD BEFORE chdir().
+	 * Save PWD before changing directory.
 	 */
 	if (pwd != NULL)
 	{
@@ -122,6 +124,7 @@ int handle_cd(char **args, char **env)
 			return (1);
 		}
 	}
+
 	/*
 	 * Change directory.
 	 */
@@ -132,9 +135,9 @@ int handle_cd(char **args, char **env)
 		free(target);
 		return (1);
 	}
+
 	/*
-	 * OLD PWD gets the directory we were in.
-	 * PWD gets the directory we moved to.
+	 * Update environment.
 	 */
 	if (update_directory_vars(env, old_directory, target) != 0)
 	{
@@ -142,19 +145,22 @@ int handle_cd(char **args, char **env)
 		free(target);
 		return (1);
 	}
+
 	/*
-	 * cd - prints the directory it changed to.
+	 * cd - prints the directory changed to.
 	 */
 	if (args[1] != NULL && string_compare(args[1], "-") == 0)
 	{
 		write(STDOUT_FILENO, target, string_length(target));
 		write(STDOUT_FILENO, "\n", 1);
 	}
+
 	free(old_directory);
 	free(target);
 
 	return (0);
-}/**
+}
+/**
  * handle_unsetenv - removes an environment variable
  * @args: command arguments
  * @env: pointer to environment
