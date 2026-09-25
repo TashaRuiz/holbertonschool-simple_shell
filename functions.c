@@ -14,6 +14,9 @@ int update_directory_vars(char **env, char *oldpwd, char *newpwd)
 	int new_len;
 	char *new_value;
 
+	if (oldpwd == NULL || newpwd == NULL)
+		return (1);
+
 	old_len = string_length(oldpwd);
 	new_len = string_length(newpwd);
 
@@ -30,7 +33,7 @@ int update_directory_vars(char **env, char *oldpwd, char *newpwd)
 			free(env[i]);
 			env[i] = new_value;
 		}
-		if (string_starts_with(env[i], "PWD="))
+		else if (string_starts_with(env[i], "PWD="))
 		{
 			new_value = malloc(new_len + 5);
 
