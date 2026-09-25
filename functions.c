@@ -45,6 +45,7 @@ int update_directory_vars(char **env, char *oldpwd, char *newpwd)
 			env[i] = new_value;
 		}
 	}
+
 	return (0);
 }
 /**
@@ -61,6 +62,7 @@ int handle_cd(char **args, char **env)
 	char *pwd;
 	char *target;
 	char *old_directory;
+	char *new_directory;
 	int i;
 
 	home = NULL;
@@ -68,6 +70,7 @@ int handle_cd(char **args, char **env)
 	pwd = NULL;
 	target = NULL;
 	old_directory = NULL;
+	new_directory = NULL;
 
 	for (i = 0; env[i] != NULL; i++)
 	{
@@ -79,9 +82,7 @@ int handle_cd(char **args, char **env)
 			pwd = env[i] + 4;
 	}
 
-	/*
-	 * Save the current PWD BEFORE doing anything.
-	 */
+	/* Save current directory before chdir(). */
 	if (pwd != NULL)
 	{
 		old_directory = string_duplicate(pwd);
@@ -90,9 +91,7 @@ int handle_cd(char **args, char **env)
 			return (1);
 	}
 
-	/*
-	 * cd with no argument
-	 */
+	/* cd */
 	if (args[1] == NULL)
 	{
 		if (home == NULL)
@@ -103,28 +102,18 @@ int handle_cd(char **args, char **env)
 
 		target = string_duplicate(home);
 	}
-	/*
-	 * cd -
-	 */
+	/* cd - */
 	else if (string_compare(args[1], "-") == 0)
 	{
 		if (oldpwd == NULL)
 		{
-			if (pwd != NULL)
-			{
-				write(STDOUT_FILENO, pwd, string_length(pwd));
-				write(STDOUT_FILENO, "\n", 1);
-			}
-
 			free(old_directory);
 			return (0);
 		}
 
 		target = string_duplicate(oldpwd);
 	}
-	/*
-	 * cd DIRECTORY
-	 */
+	/* cd DIRECTORY */
 	else
 	{
 		target = string_duplicate(args[1]);
@@ -136,9 +125,7 @@ int handle_cd(char **args, char **env)
 		return (1);
 	}
 
-	/*
-	 * Change directory.
-	 */
+	/* Change directory. */
 	if (chdir(target) == -1)
 	{
 		fprintf(stderr, "./hsh: 1: cd: can't cd to %s\n", target);
@@ -148,11 +135,24 @@ int handle_cd(char **args, char **env)
 	}
 
 	/*
-	 * Update PWD and OLDPWD.
+	 * Get the actual directory after chdir().
 	 */
-	if (update_directory_vars(env, old_directory, target) != 0)
+	new_directory = getcwd(NULL, 0);
+
+	if (new_directory == NULL)
 	{
 		free(old_directory);
+		free(target);
+		return (1);
+	}
+
+	/*
+	 * Update PWD and OLDPWD.
+	 */
+	if (update_directory_vars(env, old_directory, new_directory) != 0)
+	{
+		free(old_directory);
+		free(new_directory);
 		free(target);
 		return (1);
 	}
@@ -162,64 +162,14 @@ int handle_cd(char **args, char **env)
 	 */
 	if (args[1] != NULL && string_compare(args[1], "-") == 0)
 	{
-		write(STDOUT_FILENO, target, string_length(target));
+		write(STDOUT_FILENO, new_directory,
+		      string_length(new_directory));
 		write(STDOUT_FILENO, "\n", 1);
 	}
 
 	free(old_directory);
+	free(new_directory);
 	free(target);
-
-	return (0);
-}
-/**
- * handle_unsetenv - removes an environment variable
- * @args: command arguments
- * @env: pointer to environment
- *
- * Return: 0 on success, 1 on error
- */
-int handle_unsetenv(char **args, char ***env)
-{
-	char **new_env;
-	int count;
-	int i;
-	int j;
-	int name_len;
-
-	if (args[1] == NULL)
-		return (1);
-
-	name_len = string_length(args[1]);
-	count = 0;
-
-	while ((*env)[count] != NULL)
-		count++;
-
-	new_env = malloc(sizeof(char *) * (count + 1));
-
-	if (new_env == NULL)
-		return (1);
-
-	j = 0;
-
-	for (i = 0; i < count; i++)
-	{
-		if (string_starts_with((*env)[i], args[1])
-			&& (*env)[i][name_len] == '=')
-		{
-			free((*env)[i]);
-		}
-		else
-		{
-			new_env[j] = (*env)[i];
-			j++;
-		}
-	}
-
-	new_env[j] = NULL;
-
-	free(*env);
-	*env = new_env;
 
 	return (0);
 }
