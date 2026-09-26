@@ -52,12 +52,12 @@ int update_directory_vars(char ***env, char *oldpwd, char *newpwd)
 		if (new_value == NULL)
 			return (1);
 		sprintf(new_value, "OLDPWD=%s", oldpwd);
-		if (add_environment(new_value, env) != 0)
+		if (add_environment(new_value, env) != 0)/* env is already char *** */
 		{
 			free(new_value);
 			return (1);
 		}
-		free(new_value);
+		free(new_value);/* free the temporary buffer – this is correct */
 	}
 	if (!found_pwd)
 	{
@@ -81,7 +81,7 @@ int update_directory_vars(char ***env, char *oldpwd, char *newpwd)
  *
  * Return: 0 on success, 1 on failure
  */
-int handle_cd(char **args, char **env)
+int handle_cd(char **args, char ***env)
 {
 	char *home;
 	char *oldpwd;
