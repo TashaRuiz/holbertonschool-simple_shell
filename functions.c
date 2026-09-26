@@ -62,7 +62,6 @@ int handle_cd(char **args, char **env)
 	char *pwd;
 	char *target;
 	char *old_directory;
-	char *new_directory;
 	int i;
 
 	home = NULL;
@@ -70,7 +69,6 @@ int handle_cd(char **args, char **env)
 	pwd = NULL;
 	target = NULL;
 	old_directory = NULL;
-	new_directory = NULL;
 
 	for (i = 0; env[i] != NULL; i++)
 	{
