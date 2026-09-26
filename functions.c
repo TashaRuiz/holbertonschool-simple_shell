@@ -45,7 +45,6 @@ int update_directory_vars(char **env, char *oldpwd, char *newpwd)
 			env[i] = new_value;
 		}
 	}
-
 	return (0);
 }
 /**
@@ -79,13 +78,11 @@ int handle_cd(char **args, char **env)
 		else if (string_starts_with(env[i], "PWD="))
 			pwd = env[i] + 4;
 	}
-
 	/* cd */
 	if (args[1] == NULL)
 	{
 		if (home == NULL)
 			return (1);
-
 		target = string_duplicate(home);
 	}
 	/* cd - */
@@ -100,7 +97,6 @@ int handle_cd(char **args, char **env)
 			}
 			return (0);
 		}
-
 		target = string_duplicate(oldpwd);
 	}
 	/* cd DIRECTORY */
@@ -108,10 +104,8 @@ int handle_cd(char **args, char **env)
 	{
 		target = string_duplicate(args[1]);
 	}
-
 	if (target == NULL)
 		return (1);
-
 	/*
 	 * Save PWD before changing directory.
 	 */
@@ -125,7 +119,6 @@ int handle_cd(char **args, char **env)
 			return (1);
 		}
 	}
-
 	/*
 	 * Change directory.
 	 */
@@ -136,7 +129,6 @@ int handle_cd(char **args, char **env)
 		free(target);
 		return (1);
 	}
-
 	/*
 	 * Update environment.
 	 */
@@ -146,7 +138,6 @@ int handle_cd(char **args, char **env)
 		free(target);
 		return (1);
 	}
-
 	/*
 	 * cd - prints the directory changed to.
 	 */
@@ -155,7 +146,6 @@ int handle_cd(char **args, char **env)
 		write(STDOUT_FILENO, target, string_length(target));
 		write(STDOUT_FILENO, "\n", 1);
 	}
-
 	free(old_directory);
 	free(target);
 
@@ -220,7 +210,39 @@ int handle_setenv(char **args, char ***env)
 	i = add_environment(new_variable, env);
 	free(new_variable);
 	return (i);
-}/**
+}
+/**
+ * handle_unsetenv - removes an environment variable
+ * @args: command arguments
+ * @env: pointer to environment
+ *
+ * Return: 0 on success, 1 on failure
+ */
+int handle_unsetenv(char **args, char ***env)
+{
+	int i, j;
+	int name_len;
+
+	if (args[1] == NULL)
+		return (1);
+
+	name_len = string_length(args[1]);
+
+	for (i = 0; (*env)[i] != NULL; i++)
+	{
+		if (string_starts_with((*env)[i], args[1]) &&
+		    (*env)[i][name_len] == '=')
+		{
+			free((*env)[i]);
+			/* shift the remaining variables down */
+			for (j = i; (*env)[j] != NULL; j++)
+				(*env)[j] = (*env)[j + 1];
+			return (0);
+		}
+	}
+	return (0); /* variable not found is usually not an error */
+}
+/**
  * string_length - gets the length of a string
  * @str: string to measure
  *
@@ -263,7 +285,6 @@ int string_starts_with(char *str, char *prefix)
 
 		i++;
 	}
-
 	return (1);
 }
 /**
@@ -534,7 +555,6 @@ char *find_character(char *str, char character)
 
 		str++;
 	}
-
 	return (NULL);
 }/**
  * string_compare - compares two strings
@@ -559,7 +579,6 @@ int string_compare(char *s1, char *s2)
 
 		i++;
 	}
-
 	return (s1[i] - s2[i]);
 }
 /**
@@ -594,20 +613,17 @@ char *read_line(void)
 
 			break;
 		}
-
 		if (bytes == -1)
 		{
 			free(line);
 			return (NULL);
 		}
-
 		if (character == '\n')
 			break;
 
 		line[i] = character;
 		i++;
 	}
-
 	line[i] = '\0';
 
 	return (line);
