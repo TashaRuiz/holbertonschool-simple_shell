@@ -261,6 +261,55 @@ int handle_unsetenv(char **args, char ***env)
 	return (0); /* variable not found is usually not an error */
 }
 /**
+ * execute_one_command - processes a single command (no ;)
+ * @line: one command string (already separated from ;)
+ * @env: environment
+ * @program: program name
+ * @exit_shell: flag to exit
+ * @last_status: previous status
+ *
+ * Return: status of the command, or -1 to exit
+ */
+int execute_one_command(char *line, char ***env, char *program,
+			int *exit_shell, int last_status)
+{
+	char *args[64];
+
+	split_line(line, args);
+	if (args[0] == NULL)
+		return (0);
+
+	if (string_compare(args[0], "exit") == 0)
+	{
+		*exit_shell = 1;
+		if (args[1] != NULL)
+		{
+			if (!is_number(args[1]))
+			{
+				fprintf(stderr,
+					"%s: 1: exit: Illegal number: %s\n",
+					program, args[1]);
+				return (2);
+			}
+			return (string_to_int(args[1]));
+		}
+		return (last_status);
+	}
+	if (string_compare(args[0], "env") == 0)
+	{
+		print_env(*env);
+		return (0);
+	}
+	if (string_compare(args[0], "setenv") == 0)
+		return (handle_setenv(args, env));
+	if (string_compare(args[0], "unsetenv") == 0)
+		return (handle_unsetenv(args, env));
+	if (string_compare(args[0], "cd") == 0)
+		return (handle_cd(args, env));
+
+	return (execute_command(args, *env, program));
+}
+/**
  * string_length - gets the length of a string
  * @str: string to measure
  *
