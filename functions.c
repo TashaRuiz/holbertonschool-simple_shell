@@ -82,33 +82,15 @@ int handle_cd(char **args, char **env)
 			pwd = env[i] + 4;
 	}
 
-	/*
-	 * Save the current PWD BEFORE doing anything.
-	 */
-	if (pwd != NULL)
-	{
-		old_directory = string_duplicate(pwd);
-
-		if (old_directory == NULL)
-			return (1);
-	}
-
-	/*
-	 * cd with no argument
-	 */
+	/* cd */
 	if (args[1] == NULL)
 	{
 		if (home == NULL)
-		{
-			free(old_directory);
 			return (1);
-		}
 
 		target = string_duplicate(home);
 	}
-	/*
-	 * cd -
-	 */
+	/* cd - */
 	else if (string_compare(args[1], "-") == 0)
 	{
 		if (oldpwd == NULL)
@@ -118,25 +100,32 @@ int handle_cd(char **args, char **env)
 				write(STDOUT_FILENO, pwd, string_length(pwd));
 				write(STDOUT_FILENO, "\n", 1);
 			}
-
-			free(old_directory);
 			return (0);
 		}
 
 		target = string_duplicate(oldpwd);
 	}
-	/*
-	 * cd DIRECTORY
-	 */
+	/* cd DIRECTORY */
 	else
 	{
 		target = string_duplicate(args[1]);
 	}
 
 	if (target == NULL)
-	{
-		free(old_directory);
 		return (1);
+
+	/*
+	 * Save PWD before changing directory.
+	 */
+	if (pwd != NULL)
+	{
+		old_directory = string_duplicate(pwd);
+
+		if (old_directory == NULL)
+		{
+			free(target);
+			return (1);
+		}
 	}
 
 	/*
@@ -151,7 +140,7 @@ int handle_cd(char **args, char **env)
 	}
 
 	/*
-	 * Update PWD and OLDPWD.
+	 * Update environment.
 	 */
 	if (update_directory_vars(env, old_directory, target) != 0)
 	{
@@ -161,7 +150,7 @@ int handle_cd(char **args, char **env)
 	}
 
 	/*
-	 * cd - prints the new directory.
+	 * cd - prints the directory changed to.
 	 */
 	if (args[1] != NULL && string_compare(args[1], "-") == 0)
 	{
