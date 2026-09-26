@@ -133,47 +133,36 @@ int execute_command(char **args, char **env, char *program)
  */
 int process_line(char *line, char ***env, char *program, int *exit_shell, int last_status)
 {
-	char *args[64];
+	char *command;
+	char *saveptr;
+	int status = 0;
+	char *line_copy;
 
-	split_line(line, args);
+	/* Work on a copy so we do not destroy the original line */
+	line_copy = string_duplicate(line);
+	if (line_copy == NULL)
+		return (1);
 
-	if (args[0] == NULL)
-		return (0);
-
-	if (string_compare(args[0], "exit") == 0)
+	command = strtok(line_copy, ";");
+	while (command != NULL)
 	{
-		*exit_shell = 1;
-		if (args[1] != NULL)
+		/* Skip leading spaces/tabs */
+		while (*command == ' ' || *command == '\t')
+			command++;
+
+		if (*command != '\0')
 		{
-			if (!is_number(args[1])) /*verifica si no es un numeros pues entra a verificar si es un special char*/
-			{
-				fprintf(stderr,
-						"%s: 1: exit: Illegal number: %s\n",
-						program, args[1]);
-				return (2);
-			}
-			return (string_to_int(args[1]));
+			status = execute_one_command(command, env, program,
+						     exit_shell, last_status);
+
+			/* If the user typed "exit", stop processing more commands */
+			if (*exit_shell)
+				break;
 		}
-		return (last_status);
+		command = strtok(NULL, ";");
 	}
-	if (string_compare(args[0], "env") == 0)
-	{
-		print_env(*env);
-		return (0);
-	}
-	if(string_compare(args[0], "setenv") == 0)
-	{
-		return (handle_setenv(args, env));
-	}
-	if (string_compare(args[0], "unsetenv") == 0)
-	{
-		return (handle_unsetenv(args, env));
-	}
-	if (string_compare(args[0], "cd") == 0)
-	{
-		return (handle_cd(args, env));
-	}
-	return (execute_command(args, *env, program));
+	free(line_copy);
+	return (status);
 }
 /**
  * main - Simple UNIX command line interpreter
