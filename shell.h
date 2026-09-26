@@ -30,6 +30,6 @@ char **copy_environment(char **env);
 void free_environment(char **env);
 int add_environment(char *variable, char ***env);
 int handle_unsetenv(char **args, char ***env);
-int handle_cd(char **args, char **env);
+int handle_cd(char **args, char ***env);
 int update_directory_vars(char ***env, char *oldpwd, char *newpwd);
 #endif
