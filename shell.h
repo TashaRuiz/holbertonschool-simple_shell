@@ -23,6 +23,7 @@ char *read_line(void);
 int string_to_int(char *str);
 int is_number(char *str);
 int handle_setenv(char **args, char ***env);
+int handle_unsetenv(char **args, char ***env);
 int string_length(char *str);
 int string_starts_with(char *str, char *prefix);
 char **copy_environment(char **env);
