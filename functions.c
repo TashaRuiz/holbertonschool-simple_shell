@@ -7,7 +7,7 @@
  *
  * Return: 0 on success, 1 on failure
  */
-int update_directory_vars(char **int i)
+int update_directory_vars(char ***env, char *oldpwd, char *newpwd)
 	int old_len;
 	int new_len;
 	char *new_value;
