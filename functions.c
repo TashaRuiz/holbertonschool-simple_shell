@@ -90,7 +90,7 @@ int handle_cd(char **args, char ***env)
 	char *old_directory = NULL;
 	int i;
 
-	/* Notice (*env)[i]  ← one dereference */
+	/* Read current values from the environment */
 	for (i = 0; (*env)[i] != NULL; i++)
 	{
 		if (string_starts_with((*env)[i], "HOME="))
@@ -101,11 +101,36 @@ int handle_cd(char **args, char ***env)
 			pwd = (*env)[i] + 4;
 	}
 
-	/* ... the rest of the logic to decide target stays the same ... */
+	/* Decide the target directory */
+	if (args[1] == NULL)			/* cd  (no argument) → go to HOME */
+	{
+		if (home == NULL)
+			return (1);
+		target = string_duplicate(home);
+	}
+	else if (string_compare(args[1], "-") == 0)	/* cd - → go to OLDPWD */
+	{
+		if (oldpwd == NULL)
+		{
+			/* No OLDPWD → just print current directory and stay */
+			if (pwd != NULL)
+			{
+				write(STDOUT_FILENO, pwd, string_length(pwd));
+				write(STDOUT_FILENO, "\n", 1);
+			}
+			return (0);
+		}
+		target = string_duplicate(oldpwd);
+	}
+	else					/* cd DIRECTORY */
+	{
+		target = string_duplicate(args[1]);
+	}
 
 	if (target == NULL)
 		return (1);
 
+	/* Save the old PWD so we can put it into OLDPWD later */
 	if (pwd != NULL)
 	{
 		old_directory = string_duplicate(pwd);
@@ -116,6 +141,7 @@ int handle_cd(char **args, char ***env)
 		}
 	}
 
+	/* Actually change directory */
 	if (chdir(target) == -1)
 	{
 		fprintf(stderr, "./hsh: 1: cd: can't cd to %s\n", target);
@@ -124,7 +150,7 @@ int handle_cd(char **args, char ***env)
 		return (1);
 	}
 
-	/* env is already char ***, so pass it directly (NO extra &) */
+	/* Update the environment variables */
 	if (update_directory_vars(env, old_directory, target) != 0)
 	{
 		free(old_directory);
@@ -132,6 +158,7 @@ int handle_cd(char **args, char ***env)
 		return (1);
 	}
 
+	/* cd - must print the directory we changed to */
 	if (args[1] != NULL && string_compare(args[1], "-") == 0)
 	{
 		write(STDOUT_FILENO, target, string_length(target));
