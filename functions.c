@@ -13,6 +13,8 @@ int update_directory_vars(char **env, char *oldpwd, char *newpwd)
 	int old_len;
 	int new_len;
 	char *new_value;
+	int found_oldpwd = 0;
+	int found_pwd = 0;
 
 	if (oldpwd == NULL || newpwd == NULL)
 		return (1);
@@ -25,27 +27,52 @@ int update_directory_vars(char **env, char *oldpwd, char *newpwd)
 		if (string_starts_with(env[i], "OLDPWD="))
 		{
 			new_value = malloc(old_len + 8);
-
 			if (new_value == NULL)
 				return (1);
-
 			sprintf(new_value, "OLDPWD=%s", oldpwd);
 			free(env[i]);
 			env[i] = new_value;
+			found_oldpwd = 1;
 		}
 		else if (string_starts_with(env[i], "PWD="))
 		{
 			new_value = malloc(new_len + 5);
-
 			if (new_value == NULL)
 				return (1);
-
 			sprintf(new_value, "PWD=%s", newpwd);
 			free(env[i]);
 			env[i] = new_value;
+			found_pwd = 1;
 		}
 	}
-	return (0);
+	/* Create the variables if they did not exist */
+	if (!found_oldpwd)
+	{
+		new_value = malloc(old_len + 8);
+		if (new_value == NULL)
+			return (1);
+		sprintf(new_value, "OLDPWD=%s", oldpwd);
+		if (add_environment(new_value, &env) != 0)
+		{
+			free(new_value);
+			return (1);
+		}
+		free(new_value);
+	}
+	if (!found_pwd)
+	{
+		new_value = malloc(new_len + 5);
+		if (new_value == NULL)
+			return (1);
+		sprintf(new_value, "PWD=%s", newpwd);
+		if (add_environment(new_value, &env) != 0)
+		{
+			free(new_value);
+			return (1);
+		}
+		free(new_value);
+	}
+	return (0)
 }
 /**
  * handle_cd - changes the current working directory
