@@ -82,7 +82,9 @@ int handle_cd(char **args, char **env)
 			pwd = env[i] + 4;
 	}
 
-	/* Save current directory before chdir(). */
+	/*
+	 * Save the current PWD BEFORE doing anything.
+	 */
 	if (pwd != NULL)
 	{
 		old_directory = string_duplicate(pwd);
@@ -91,7 +93,9 @@ int handle_cd(char **args, char **env)
 			return (1);
 	}
 
-	/* cd */
+	/*
+	 * cd with no argument
+	 */
 	if (args[1] == NULL)
 	{
 		if (home == NULL)
@@ -102,18 +106,28 @@ int handle_cd(char **args, char **env)
 
 		target = string_duplicate(home);
 	}
-	/* cd - */
+	/*
+	 * cd -
+	 */
 	else if (string_compare(args[1], "-") == 0)
 	{
 		if (oldpwd == NULL)
 		{
+			if (pwd != NULL)
+			{
+				write(STDOUT_FILENO, pwd, string_length(pwd));
+				write(STDOUT_FILENO, "\n", 1);
+			}
+
 			free(old_directory);
 			return (0);
 		}
 
 		target = string_duplicate(oldpwd);
 	}
-	/* cd DIRECTORY */
+	/*
+	 * cd DIRECTORY
+	 */
 	else
 	{
 		target = string_duplicate(args[1]);
@@ -125,7 +139,9 @@ int handle_cd(char **args, char **env)
 		return (1);
 	}
 
-	/* Change directory. */
+	/*
+	 * Change directory.
+	 */
 	if (chdir(target) == -1)
 	{
 		fprintf(stderr, "./hsh: 1: cd: can't cd to %s\n", target);
@@ -135,24 +151,11 @@ int handle_cd(char **args, char **env)
 	}
 
 	/*
-	 * Get the actual directory after chdir().
-	 */
-	new_directory = getcwd(NULL, 0);
-
-	if (new_directory == NULL)
-	{
-		free(old_directory);
-		free(target);
-		return (1);
-	}
-
-	/*
 	 * Update PWD and OLDPWD.
 	 */
-	if (update_directory_vars(env, old_directory, new_directory) != 0)
+	if (update_directory_vars(env, old_directory, target) != 0)
 	{
 		free(old_directory);
-		free(new_directory);
 		free(target);
 		return (1);
 	}
@@ -162,13 +165,11 @@ int handle_cd(char **args, char **env)
 	 */
 	if (args[1] != NULL && string_compare(args[1], "-") == 0)
 	{
-		write(STDOUT_FILENO, new_directory,
-		      string_length(new_directory));
+		write(STDOUT_FILENO, target, string_length(target));
 		write(STDOUT_FILENO, "\n", 1);
 	}
 
 	free(old_directory);
-	free(new_directory);
 	free(target);
 
 	return (0);
