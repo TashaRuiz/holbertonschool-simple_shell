@@ -7,8 +7,8 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-/*#define MAX_ARGS 10
-extern char **environ;*/
+#define MAX_ALIASES 50
+
 char *build_path(char *dir, char *command);
 void split_line(char *line, char **args);
 void print_env(char **env);
@@ -31,7 +31,17 @@ void free_environment(char **env);
 int add_environment(char *variable, char ***env);
 int handle_unsetenv(char **args, char ***env);
 int handle_cd(char **args, char ***env);
+int handle_alias(char **args);
 int update_directory_vars(char ***env, char *oldpwd, char *newpwd);
 int execute_one_command(char *line, char ***env, char *program, int *exit_shell, int last_status);
 int execute_logical_list(char *list, char ***env, char *program, int *exit_shell, int last_status);
+
+typedef struct alias_s
+{
+	char *name;
+	char *value;
+} alias_t;
+
+alias_t aliases[MAX_ALIASES];
+int alias_count = 0;
 #endif
