@@ -262,6 +262,8 @@ int handle_unsetenv(char **args, char ***env)
  */
 int handle_alias(char **args)
 {
+	alias_t aliases[MAX_ALIASES];
+	int alias_count = 0;
 	int i;
 	char *name;
 	char *value;
