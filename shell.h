@@ -42,6 +42,6 @@ typedef struct alias_s
 	char *value;
 } alias_t;
 
-alias_t aliases[MAX_ALIASES];
-int alias_count = 0;
+extern alias_t aliases[MAX_ALIASES];
+extern int alias_count;
 #endif
