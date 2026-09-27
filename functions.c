@@ -100,15 +100,14 @@ int handle_cd(char **args, char ***env)
 		else if (string_starts_with((*env)[i], "PWD="))
 			pwd = (*env)[i] + 4;
 	}
-
 	/* Decide the target directory */
-	if (args[1] == NULL)			/* cd  (no argument) → go to HOME */
+	if (args[1] == NULL) /* cd  (no argument) → go to HOME */
 	{
 		if (home == NULL)
 			return (1);
 		target = string_duplicate(home);
 	}
-	else if (string_compare(args[1], "-") == 0)	/* cd - → go to OLDPWD */
+	else if (string_compare(args[1], "-") == 0) /* cd - → go to OLDPWD */
 	{
 		if (oldpwd == NULL)
 		{
@@ -122,11 +121,10 @@ int handle_cd(char **args, char ***env)
 		}
 		target = string_duplicate(oldpwd);
 	}
-	else					/* cd DIRECTORY */
+	else /* cd DIRECTORY */
 	{
 		target = string_duplicate(args[1]);
 	}
-
 	if (target == NULL)
 		return (1);
 
@@ -140,7 +138,6 @@ int handle_cd(char **args, char ***env)
 			return (1);
 		}
 	}
-
 	/* Actually change directory */
 	if (chdir(target) == -1)
 	{
@@ -149,7 +146,6 @@ int handle_cd(char **args, char ***env)
 		free(target);
 		return (1);
 	}
-
 	/* Update the environment variables */
 	if (update_directory_vars(env, old_directory, target) != 0)
 	{
@@ -157,14 +153,12 @@ int handle_cd(char **args, char ***env)
 		free(target);
 		return (1);
 	}
-
 	/* cd - must print the directory we changed to */
 	if (args[1] != NULL && string_compare(args[1], "-") == 0)
 	{
 		write(STDOUT_FILENO, target, string_length(target));
 		write(STDOUT_FILENO, "\n", 1);
 	}
-
 	free(old_directory);
 	free(target);
 	return (0);
@@ -270,8 +264,7 @@ int handle_unsetenv(char **args, char ***env)
  *
  * Return: status of the command, or -1 to exit
  */
-int execute_one_command(char *line, char ***env, char *program,
-			int *exit_shell, int last_status)
+int execute_one_command(char *line, char ***env, char *program, int *exit_shell, int last_status)
 {
 	char *args[64];
 
@@ -308,6 +301,78 @@ int execute_one_command(char *line, char ***env, char *program,
 		return (handle_cd(args, env));
 
 	return (execute_command(args, *env, program));
+}
+/**
+ * execute_logical_list - handles commands connected by && and ||
+ * (works with or without spaces around the operators)
+ * @list: the string that may contain && or ||
+ * @env: environment
+ * @program: program name
+ * @exit_shell: flag to exit the shell
+ * @last_status: previous command status
+ *
+ * Return: status of the last command that was actually executed
+ */
+int execute_logical_list(char *list, char ***env, char *program, int *exit_shell, int last_status)
+{
+	char *start;
+	char *p;
+	char *op;
+	int status = last_status;
+	int should_run = 1; /* first command always runs */
+
+	start = list;
+
+	while (start != NULL && *start != '\0')
+	{
+		/* skip leading spaces */
+		while (*start == ' ' || *start == '\t')
+			start++;
+
+		if (*start == '\0')
+			break;
+
+		/* look for the next && or || */
+		p = start;
+		op = NULL;
+
+		while (*p != '\0')
+		{
+			if (p[0] == '&' && p[1] == '&')
+			{
+				op = "&&";
+				*p = '\0'; /* cut the current command */
+				p += 2;
+				break;
+			}
+			if (p[0] == '|' && p[1] == '|')
+			{
+				op = "||";
+				*p = '\0';
+				p += 2;
+				break;
+			}
+			p++;
+		}
+		/* execute the current command if we should */
+		if (*start != '\0' && should_run)
+		{
+			status = execute_one_command(start, env, program, exit_shell, last_status);
+			if (*exit_shell)
+				return (status);
+		}
+		/* decide whether the next command should run */
+		if (op == NULL)
+			break; /* no more operators */
+
+		if (string_compare(op, "&&") == 0)
+			should_run = (status == 0); /* run next only on success */
+		else
+			should_run = (status != 0); /* run next only on failure */
+
+		start = p; /* continue after the operator */
+	}
+	return (status);
 }
 /**
  * string_length - gets the length of a string
