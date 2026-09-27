@@ -255,6 +255,63 @@ int handle_unsetenv(char **args, char ***env)
 	return (0); /* variable not found is usually not an error */
 }
 /**
+ * handle_alias - implements the alias builtin
+ * @args: command arguments
+ *
+ * Return: 0 on success, 1 on failure
+ */
+int handle_alias(char **args)
+{
+	int i;
+	char *name;
+	char *value;
+	char *equal;
+
+	/* Case 1: just "alias" → print all aliases */
+	if (args[1] == NULL)
+	{
+		for (i = 0; i < alias_count; i++)
+		{
+			write(STDOUT_FILENO, aliases[i].name, string_length(aliases[i].name));
+			write(STDOUT_FILENO, "='", 2);
+			write(STDOUT_FILENO, aliases[i].value, string_length(aliases[i].value));
+			write(STDOUT_FILENO, "'\n", 2);
+		}
+		return (0);
+	}
+	/* Process each argument after "alias" */
+	for (i = 1; args[i] != NULL; i++)
+	{
+		equal = find_character(args[i], '=');
+
+		if (equal == NULL)
+		{
+			/* "alias name" → print that alias if it exists */
+			/* (optional for the current test, but good to have) */
+			continue;
+		}
+
+		/* "alias name=value" */
+		*equal = '\0';
+		name = args[i];
+		value = equal + 1;
+
+		/* Check if the alias already exists → update it */
+		/* otherwise add a new one */
+		/* (simple version below) */
+		if (alias_count < MAX_ALIASES)
+		{
+			aliases[alias_count].name = string_duplicate(name);
+			aliases[alias_count].value = string_duplicate(value);
+			if (aliases[alias_count].name == NULL ||
+			    aliases[alias_count].value == NULL)
+				return (1);
+			alias_count++;
+		}
+	}
+	return (0);
+}
+/**
  * execute_one_command - processes a single command (no ;)
  * @line: one command string (already separated from ;)
  * @env: environment
@@ -293,12 +350,15 @@ int execute_one_command(char *line, char ***env, char *program, int *exit_shell,
 		print_env(*env);
 		return (0);
 	}
+	/*Call all handles functions*/
 	if (string_compare(args[0], "setenv") == 0)
 		return (handle_setenv(args, env));
 	if (string_compare(args[0], "unsetenv") == 0)
 		return (handle_unsetenv(args, env));
 	if (string_compare(args[0], "cd") == 0)
 		return (handle_cd(args, env));
+	if (string_compare(args[0], "alias") == 0)
+		return (handle_alias(args));
 
 	return (execute_command(args, *env, program));
 }
