@@ -152,8 +152,7 @@ int process_line(char *line, char ***env, char *program, int *exit_shell, int la
 
 		if (*command != '\0')
 		{
-			status = execute_one_command(command, env, program,
-						     exit_shell, last_status);
+			status = execute_logical_list(command, env, program, exit_shell, last_status);
 
 			/* If the user typed "exit", stop processing more commands */
 			if (*exit_shell)
@@ -200,7 +199,6 @@ int main(int argc, char **argv, char **env)
 
 			break;
 		}
-
 		result = process_line(line, &shell_env, argv[0], &exit_shell, status);
 		free(line);
 
