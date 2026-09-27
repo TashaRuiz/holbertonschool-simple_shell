@@ -134,7 +134,7 @@ int execute_command(char **args, char **env, char *program)
 int process_line(char *line, char ***env, char *program, int *exit_shell, int last_status)
 {
 	char *command;
-	char *saveptr;
+	/*char *saveptr;*/
 	int status = 0;
 	char *line_copy;
 
