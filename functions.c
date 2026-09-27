@@ -260,56 +260,51 @@ int handle_unsetenv(char **args, char ***env)
  *
  * Return: 0 on success, 1 on failure
  */
+alias_t aliases[MAX_ALIASES];
+int alias_count = 0;
 int handle_alias(char **args)
 {
-	alias_t aliases[MAX_ALIASES];
-	int alias_count = 0;
 	int i;
 	char *name;
 	char *value;
 	char *equal;
 
-	/* Case 1: just "alias" → print all aliases */
+	/* ---------- just "alias" → print all aliases ---------- */
 	if (args[1] == NULL)
 	{
 		for (i = 0; i < alias_count; i++)
 		{
-			write(STDOUT_FILENO, aliases[i].name, string_length(aliases[i].name));
+			write(STDOUT_FILENO, aliases[i].name,
+			      string_length(aliases[i].name));
 			write(STDOUT_FILENO, "='", 2);
-			write(STDOUT_FILENO, aliases[i].value, string_length(aliases[i].value));
+			write(STDOUT_FILENO, aliases[i].value,
+			      string_length(aliases[i].value));
 			write(STDOUT_FILENO, "'\n", 2);
 		}
 		return (0);
 	}
-	/* Process each argument after "alias" */
+	/* ---------- "alias name=value" ---------- */
 	for (i = 1; args[i] != NULL; i++)
 	{
 		equal = find_character(args[i], '=');
-
 		if (equal == NULL)
-		{
-			/* "alias name" → print that alias if it exists */
-			/* (optional for the current test, but good to have) */
-			continue;
-		}
+			continue;		/* skip "alias name" for now */
 
-		/* "alias name=value" */
-		*equal = '\0';
+		*equal = '\0';			/* split name and value */
 		name = args[i];
 		value = equal + 1;
 
-		/* Check if the alias already exists → update it */
-		/* otherwise add a new one */
-		/* (simple version below) */
-		if (alias_count < MAX_ALIASES)
-		{
-			aliases[alias_count].name = string_duplicate(name);
-			aliases[alias_count].value = string_duplicate(value);
-			if (aliases[alias_count].name == NULL ||
-			    aliases[alias_count].value == NULL)
-				return (1);
-			alias_count++;
-		}
+		if (alias_count >= MAX_ALIASES)
+			continue;
+
+		aliases[alias_count].name = string_duplicate(name);
+		aliases[alias_count].value = string_duplicate(value);
+
+		if (aliases[alias_count].name == NULL ||
+		    aliases[alias_count].value == NULL)
+			return (1);
+
+		alias_count++;
 	}
 	return (0);
 }
@@ -352,7 +347,7 @@ int execute_one_command(char *line, char ***env, char *program, int *exit_shell,
 		print_env(*env);
 		return (0);
 	}
-	/*Call all handles functions*/
+	/*Call all handles functions to print when user write the command*/
 	if (string_compare(args[0], "setenv") == 0)
 		return (handle_setenv(args, env));
 	if (string_compare(args[0], "unsetenv") == 0)
