@@ -319,7 +319,7 @@ int expand_alias(char **args)
 {
 	int i;
 	char *new_value;
-	char *old;
+	/*char *old;*/
 
 	if (args[0] == NULL)
 		return (0);
@@ -329,7 +329,7 @@ int expand_alias(char **args)
 		if (string_compare(args[0], aliases[i].name) == 0)
 		{
 			/* Found an alias – replace args[0] */
-			old = args[0];
+			/*old = args[0];*/
 			new_value = string_duplicate(aliases[i].value);
 			if (new_value == NULL)
 				return (0);
