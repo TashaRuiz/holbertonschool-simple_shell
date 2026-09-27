@@ -207,6 +207,7 @@ int main(int argc, char **argv, char **env)
 		if (exit_shell)
 			break;
 	}
+	free_aliases();
 	free_environment(shell_env);
 	return (status);
 }
