@@ -309,6 +309,22 @@ int handle_alias(char **args)
 	return (0);
 }
 /**
+ * free_aliases - frees all stored aliases
+ */
+void free_aliases(void)
+{
+	int i;
+
+	for (i = 0; i < alias_count; i++)
+	{
+		free(aliases[i].name);
+		free(aliases[i].value);
+		aliases[i].name = NULL;
+		aliases[i].value = NULL;
+	}
+	alias_count = 0;
+}
+/**
  * execute_one_command - processes a single command (no ;)
  * @line: one command string (already separated from ;)
  * @env: environment
