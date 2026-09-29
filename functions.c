@@ -444,9 +444,6 @@ int execute_one_command(char *line, char ***env, char *program, int *exit_shell,
 	char *expanded_alias = NULL;
 
 	split_line(line, args);
-	/* ... after split_line and alias expansion ... */
-	expanded_var = expand_variables(args, last_status);
-	
 	if (args[0] == NULL)
 		return (0);
 
@@ -461,6 +458,9 @@ int execute_one_command(char *line, char ***env, char *program, int *exit_shell,
 			expanded_str = tmp;
 		}
 	} while (tmp != NULL);
+
+	/* ... after split_line and alias expansion ... */
+	expanded_var = expand_variables(args, last_status);
 
 	/* ---------- normal command handling ---------- */
 	if (string_compare(args[0], "exit") == 0)
