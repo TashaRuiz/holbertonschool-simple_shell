@@ -396,6 +396,28 @@ void free_aliases(void)
 	alias_count = 0;
 }
 /**
+ * expand_variables - replaces $? in the arguments
+ * @args: argument list
+ * @last_status: status of the previous command
+ */
+void expand_variables(char **args, int last_status)
+{
+	int i;
+	char status_str[16];
+
+	sprintf(status_str, "%d", last_status);
+
+	for (i = 0; args[i] != NULL; i++)
+	{
+		if (string_compare(args[i], "$?") == 0)
+		{
+			/* Replace the argument with the status number */
+			/* (simple version – we just point to a static buffer) */
+			args[i] = status_str;
+		}
+	}
+}
+/**
  * execute_one_command - processes a single command (no ;)
  * @line: one command string (already separated from ;)
  * @env: environment
@@ -413,6 +435,8 @@ int execute_one_command(char *line, char ***env, char *program, int *exit_shell,
 	int status;
 
 	split_line(line, args);
+	expand_variables(args, last_status);
+
 	if (args[0] == NULL)
 		return (0);
 
@@ -443,6 +467,18 @@ int execute_one_command(char *line, char ***env, char *program, int *exit_shell,
 			return (string_to_int(args[1]));
 		}
 		return (last_status);			/* ← uses last_status */
+	}
+	if (string_compare(args[0], "echo") == 0)
+	{
+		int i;
+		for (i = 1; args[i] != NULL; i++)
+		{
+			if (i > 1)
+				write(STDOUT_FILENO, " ", 1);
+			write(STDOUT_FILENO, args[i], string_length(args[i]));
+		}
+		write(STDOUT_FILENO, "\n", 1);
+		return (0);
 	}
 	else if (string_compare(args[0], "env") == 0)
 	{
