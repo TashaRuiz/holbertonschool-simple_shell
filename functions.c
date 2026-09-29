@@ -418,6 +418,22 @@ int execute_one_command(char *line, char ***env, char *program, int *exit_shell,
 		status = 0;
 	}
 	/* ... all other builtins ... */
+	else if (string_compare(args[0], "setenv") == 0)
+	{
+		status = handle_setenv(args, env);
+	}
+	else if (string_compare(args[0], "unsetenv") == 0)
+	{
+		status = handle_unsetenv(args, env);
+	}
+	else if (string_compare(args[0], "cd") == 0)
+	{
+		status = handle_cd(args, env);
+	}
+	else if (string_compare(args[0], "alias") == 0)   /* ← THIS LINE IS MISSING */
+	{
+		status = handle_alias(args);
+	}
 	else
 	{
 		status = execute_command(args, *env, program);
