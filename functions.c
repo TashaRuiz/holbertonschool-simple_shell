@@ -396,26 +396,33 @@ void free_aliases(void)
 	alias_count = 0;
 }
 /**
- * expand_variables - replaces $? in the arguments
+ * expand_variables - replaces $? with the last exit status
  * @args: argument list
  * @last_status: status of the previous command
+ *
+ * Note: the new string is allocated. The caller should free it
+ * after the command has finished (same way you free alias expansions).
  */
-void expand_variables(char **args, int last_status)
+char *expand_variables(char **args, int last_status)
 {
 	int i;
-	char status_str[16];
-
-	sprintf(status_str, "%d", last_status);
+	char *status_str;
+	char *result = NULL;
 
 	for (i = 0; args[i] != NULL; i++)
 	{
 		if (string_compare(args[i], "$?") == 0)
 		{
-			/* Replace the argument with the status number */
-			/* (simple version – we just point to a static buffer) */
+			status_str = malloc(16);
+			if (status_str == NULL)
+				return (NULL);
+
+			sprintf(status_str, "%d", last_status);
 			args[i] = status_str;
+			result = status_str;	/* remember it so we can free it later */
 		}
 	}
+	return (result);
 }
 /**
  * execute_one_command - processes a single command (no ;)
@@ -433,10 +440,13 @@ int execute_one_command(char *line, char ***env, char *program, int *exit_shell,
 	char *expanded_str = NULL;
 	char *tmp;
 	int status;
+	char *expanded_var = NULL;
+	char *expanded_alias = NULL;
 
 	split_line(line, args);
-	expand_variables(args, last_status);
-
+	/* ... after split_line and alias expansion ... */
+	expanded_var = expand_variables(args, last_status);
+	
 	if (args[0] == NULL)
 		return (0);
 
@@ -509,6 +519,12 @@ int execute_one_command(char *line, char ***env, char *program, int *exit_shell,
 	/* Free the string we allocated during alias expansion */
 	if (expanded_str != NULL)
 		free(expanded_str);
+	
+	/* free what we allocated */
+	if (expanded_var != NULL)
+		free(expanded_var);
+	if (expanded_alias != NULL)
+		free(expanded_alias);
 
 	return (status);
 }
