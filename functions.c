@@ -399,7 +399,18 @@ int execute_one_command(char *line, char ***env, char *program, int *exit_shell,
 	/* ---------- normal command handling ---------- */
 	if (string_compare(args[0], "exit") == 0)
 	{
-		/* ... your existing exit code ... */
+		*exit_shell = 1;			/* ← uses exit_shell */
+
+		if (args[1] != NULL)
+		{
+			if (!is_number(args[1]))
+			{
+				fprintf(stderr, "%s: 1: exit: Illegal number: %s\n", program, args[1]);
+				return (2);
+			}
+			return (string_to_int(args[1]));
+		}
+		return (last_status);			/* ← uses last_status */
 	}
 	else if (string_compare(args[0], "env") == 0)
 	{
