@@ -264,12 +264,13 @@ alias_t aliases[MAX_ALIASES];
 int alias_count = 0;
 int handle_alias(char **args)
 {
-	int i;
+	int i, j;
+	char *equal;
 	char *name;
 	char *value;
-	char *equal;
+	int found;
 
-	/* ---------- just "alias" → print all aliases ---------- */
+	/* Case 1: just "alias" → print all aliases */
 	if (args[1] == NULL)
 	{
 		for (i = 0; i < alias_count; i++)
@@ -283,28 +284,59 @@ int handle_alias(char **args)
 		}
 		return (0);
 	}
-	/* ---------- "alias name=value" ---------- */
+
+	/* Process every argument after "alias" */
 	for (i = 1; args[i] != NULL; i++)
 	{
 		equal = find_character(args[i], '=');
-		if (equal == NULL)
-			continue;		/* skip "alias name" for now */
 
-		*equal = '\0';			/* split name and value */
-		name = args[i];
-		value = equal + 1;
+		if (equal != NULL)
+		{
+			/* ---------- create / update alias ---------- */
+			*equal = '\0';
+			name = args[i];
+			value = equal + 1;
 
-		if (alias_count >= MAX_ALIASES)
-			continue;
+			/* Look if the alias already exists → update it */
+			found = 0;
+			for (j = 0; j < alias_count; j++)
+			{
+				if (string_compare(aliases[j].name, name) == 0)
+				{
+					free(aliases[j].value);
+					aliases[j].value = string_duplicate(value);
+					found = 1;
+					break;
+				}
+			}
 
-		aliases[alias_count].name = string_duplicate(name);
-		aliases[alias_count].value = string_duplicate(value);
-
-		if (aliases[alias_count].name == NULL ||
-		    aliases[alias_count].value == NULL)
-			return (1);
-
-		alias_count++;
+			/* New alias */
+			if (!found && alias_count < MAX_ALIASES)
+			{
+				aliases[alias_count].name = string_duplicate(name);
+				aliases[alias_count].value = string_duplicate(value);
+				if (aliases[alias_count].name && aliases[alias_count].value)
+					alias_count++;
+			}
+		}
+		else
+		{
+			/* ---------- print a specific alias ---------- */
+			name = args[i];
+			for (j = 0; j < alias_count; j++)
+			{
+				if (string_compare(aliases[j].name, name) == 0)
+				{
+					write(STDOUT_FILENO, aliases[j].name,
+					      string_length(aliases[j].name));
+					write(STDOUT_FILENO, "='", 2);
+					write(STDOUT_FILENO, aliases[j].value,
+					      string_length(aliases[j].value));
+					write(STDOUT_FILENO, "'\n", 2);
+					break;
+				}
+			}
+		}
 	}
 	return (0);
 }
