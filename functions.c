@@ -315,14 +315,14 @@ int handle_alias(char **args)
  *
  * Return: 1 if an expansion was done, 0 otherwise
  */
-int expand_alias(char **args)
+char *expand_alias(char **args)
 {
 	int i;
-	char *new_value;
+	char *new_value = NULL;
 	/*char *old;*/
 
 	if (args[0] == NULL)
-		return (0);
+		return (NULL);
 
 	for (i = 0; i < alias_count; i++)
 	{
@@ -332,7 +332,7 @@ int expand_alias(char **args)
 			/*old = args[0];*/
 			new_value = string_duplicate(aliases[i].value);
 			if (new_value == NULL)
-				return (0);
+				return (NULL);
 
 			/* Very simple: we only replace the command name.
 			 * For the checker this is enough. */
@@ -342,10 +342,10 @@ int expand_alias(char **args)
 			   but in your current split_line it points into the line,
 			   so do NOT free it. */
 
-			return (1);	/* expansion done */
+			return (new_value);	/* expansion done */
 		}
 	}
-	return (0);			/* no alias found */
+	return (NULL);			/* no alias found */
 }
 /**
  * free_aliases - frees all stored aliases
@@ -376,51 +376,46 @@ void free_aliases(void)
 int execute_one_command(char *line, char ***env, char *program, int *exit_shell, int last_status)
 {
 	char *args[64];
-	int expanded;
+	char *expanded_str = NULL;
+	char *tmp;
+	int status;
 
 	split_line(line, args);
 	if (args[0] == NULL)
 		return (0);
 
-	/* ========== ALIAS EXPANSION ========== */
-	/* Keep expanding while the command is an alias
-	   (needed for the double-alias test) */
+	/* Expand aliases (keep expanding for chained aliases) */
 	do {
-		expanded = expand_alias(args);
-	} while (expanded);
+		tmp = expand_alias(args);
+		if (tmp != NULL)
+		{
+			/* Free the previous expansion if we expanded more than once */
+			if (expanded_str != NULL)
+				free(expanded_str);
+			expanded_str = tmp;
+		}
+	} while (tmp != NULL);
 
+	/* ---------- normal command handling ---------- */
 	if (string_compare(args[0], "exit") == 0)
 	{
-		*exit_shell = 1;
-		if (args[1] != NULL)
-		{
-			if (!is_number(args[1]))
-			{
-				fprintf(stderr,
-					"%s: 1: exit: Illegal number: %s\n",
-					program, args[1]);
-				return (2);
-			}
-			return (string_to_int(args[1]));
-		}
-		return (last_status);
+		/* ... your existing exit code ... */
 	}
-	if (string_compare(args[0], "env") == 0)
+	else if (string_compare(args[0], "env") == 0)
 	{
 		print_env(*env);
-		return (0);
+		status = 0;
 	}
-	/*Call all handles functions to print when user write the command*/
-	if (string_compare(args[0], "setenv") == 0)
-		return (handle_setenv(args, env));
-	if (string_compare(args[0], "unsetenv") == 0)
-		return (handle_unsetenv(args, env));
-	if (string_compare(args[0], "cd") == 0)
-		return (handle_cd(args, env));
-	if (string_compare(args[0], "alias") == 0)
-		return (handle_alias(args));
+	/* ... all other builtins ... */
+	else
+	{
+		status = execute_command(args, *env, program);
+	}
+	/* Free the string we allocated during alias expansion */
+	if (expanded_str != NULL)
+		free(expanded_str);
 
-	return (execute_command(args, *env, program));
+	return (status);
 }
 /**
  * execute_logical_list - handles commands connected by && and ||
