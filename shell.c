@@ -165,6 +165,30 @@ int process_line(char *line, char ***env, char *program, int *exit_shell, int la
 	return (status);
 }
 /**
+ * read_line_from_file - reads one line from a FILE*
+ * @fp: the file pointer
+ *
+ * Return: allocated line (without the newline), or NULL on EOF/error
+ */
+char *read_line_from_file(FILE *fp)
+{
+	char *line = NULL;
+	size_t len = 0;
+	ssize_t nread;
+
+	nread = getline(&line, &len, fp);
+	if (nread == -1)
+	{
+		free(line);
+		return (NULL);
+	}
+	/* remove the trailing newline if present */
+	if (nread > 0 && line[nread - 1] == '\n')
+		line[nread - 1] = '\0';
+
+	return (line);
+}
+/**
  * main - Simple UNIX command line interpreter
  * @argc: number of arguments
  * @argv: array of arguments
@@ -190,7 +214,7 @@ int main(int argc, char **argv, char **env)
 		{
 			fprintf(stderr, "%s: 0: Can't open %s\n", program, argv[1]);
 			free_environment(env);
-			free_aliases();		/* if you have it */
+			free_aliases(); /* if you have it */
 			return (127);
 		}
 	}
@@ -200,7 +224,7 @@ int main(int argc, char **argv, char **env)
 		if (script != NULL)
 		{
 			/* read from the script file */
-			line = /* your function to read a line from FILE* */;
+			line = read_line_from_file(script); /* your function to read a line from FILE* */;
 			if (line == NULL)	/* EOF */
 				break;
 		}
