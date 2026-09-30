@@ -138,6 +138,7 @@ int process_line(char *line, char ***env, char *program, int *exit_shell, int la
 	int status = 0;
 	char *line_copy;
 
+	remove_comments(line); /*Call it before split on ; or do anything else with the line*/
 	/* Work on a copy so we do not destroy the original line */
 	line_copy = string_duplicate(line);
 	if (line_copy == NULL)
