@@ -175,40 +175,50 @@ int process_line(char *line, char ***env, char *program, int *exit_shell, int la
 int main(int argc, char **argv, char **env)
 {
 	char *line;
-	char **shell_env;
 	int status = 0;
-	int result;
 	int exit_shell = 0;
+	FILE *script = NULL;
+	char *program = argv[0];
 
-	(void)argc;
+	env = copy_environment(environ);	/* or however you copy the env */
 
-	shell_env = copy_environment(env);
-	if (shell_env == NULL)
-		return (1);
-
-	while (1)
+	/* ---------- Non-interactive mode: a file was given ---------- */
+	if (argc >= 2)
 	{
-		if (isatty(STDIN_FILENO))
-			write(STDOUT_FILENO, "$ ", 2);
-
-		line = read_line();
-
-		if (line == NULL)
+		script = fopen(argv[1], "r");
+		if (script == NULL)
 		{
-			/*if (isatty(STDIN_FILENO))
-				write(STDOUT_FILENO, "\n", 1);*/
-
-			break;
+			fprintf(stderr, "%s: 0: Can't open %s\n", program, argv[1]);
+			free_environment(env);
+			free_aliases();		/* if you have it */
+			return (127);
 		}
-		result = process_line(line, &shell_env, argv[0], &exit_shell, status);
-		free(line);
-
-		status = result;
-
-		if (exit_shell)
-			break;
 	}
+	/* ---------- Main loop ---------- */
+	while (!exit_shell)
+	{
+		if (script != NULL)
+		{
+			/* read from the script file */
+			line = /* your function to read a line from FILE* */;
+			if (line == NULL)	/* EOF */
+				break;
+		}
+		else
+		{
+			/* interactive mode – read from stdin */
+			line = read_line();
+			if (line == NULL)	/* Ctrl+D / EOF */
+				break;
+		}
+
+		status = process_line(line, &env, program, &exit_shell, status);
+		free(line);
+	}
+	if (script != NULL)
+		fclose(script);
+
+	free_environment(env);
 	free_aliases();
-	free_environment(shell_env);
 	return (status);
 }
