@@ -407,50 +407,56 @@ void free_aliases(void)
 char *expand_variables(char **args, char **env, int last_status)
 {
 	int i, j;
-	char *status_str = NULL;
+	char *new_str = NULL;
 	char *result = NULL;
 	char *name;
 	char *value;
+	int name_len;
 
 	for (i = 0; args[i] != NULL; i++)
 	{
 		/* ---------- $? ---------- */
 		if (string_compare(args[i], "$?") == 0)
 		{
-			status_str = malloc(16);
-			if (status_str == NULL)
+			new_str = malloc(16);
+			if (new_str == NULL)
 				return (NULL);
-			sprintf(status_str, "%d", last_status);
-			args[i] = status_str;
-			result = status_str;
+			sprintf(new_str, "%d", last_status);
+			args[i] = new_str;
+			result = new_str;
 			continue;
 		}
 		/* ---------- $VAR ---------- */
 		if (args[i][0] == '$' && args[i][1] != '\0')
 		{
-			name = args[i] + 1;		/* skip the '$' */
-
+			name = args[i] + 1;
+			name_len = string_length(name);
 			value = NULL;
+
 			for (j = 0; env[j] != NULL; j++)
 			{
 				if (string_starts_with(env[j], name) &&
-				    env[j][string_length(name)] == '=')
+				    env[j][name_len] == '=')
 				{
-					value = env[j] + string_length(name) + 1;
+					value = env[j] + name_len + 1;
 					break;
 				}
 			}
 			if (value != NULL)
 			{
-				/* Replace the argument with the value */
-				/* We allocate a copy so we can free it later */
-				status_str = string_duplicate(value);
-				if (status_str == NULL)
-					return (NULL);
-				args[i] = status_str;
-				result = status_str;
+				/* variable exists → use its value */
+				new_str = string_duplicate(value);
 			}
-			/* if the variable does not exist we leave $VAR as-is(most simple shells do this) */
+			else
+			{
+				/* variable does NOT exist → empty string */
+				new_str = string_duplicate("");
+			}
+			if (new_str == NULL)
+				return (NULL);
+
+			args[i] = new_str;
+			result = new_str;
 		}
 	}
 	return (result);
