@@ -9,6 +9,7 @@
 #include <sys/wait.h>
 #define MAX_ALIASES 50
 
+char *read_line_from_file(FILE *fp);
 char *build_path(char *dir, char *command);
 void split_line(char *line, char **args);
 void print_env(char **env);
