@@ -48,4 +48,5 @@ typedef struct alias_s
 
 extern alias_t aliases[MAX_ALIASES];
 extern int alias_count;
+extern char **environ; /* the real environment */
 #endif
