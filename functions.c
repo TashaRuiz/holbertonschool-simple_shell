@@ -398,28 +398,59 @@ void free_aliases(void)
 /**
  * expand_variables - replaces $? with the last exit status
  * @args: argument list
+ * @env: enviroment
  * @last_status: status of the previous command
  *
  * Note: the new string is allocated. The caller should free it
  * after the command has finished (same way you free alias expansions).
  */
-char *expand_variables(char **args, int last_status)
+char *expand_variables(char **args, char **env, int last_status)
 {
-	int i;
-	char *status_str;
+	int i, j;
+	char *status_str = NULL;
 	char *result = NULL;
+	char *name;
+	char *value;
 
 	for (i = 0; args[i] != NULL; i++)
 	{
+		/* ---------- $? ---------- */
 		if (string_compare(args[i], "$?") == 0)
 		{
 			status_str = malloc(16);
 			if (status_str == NULL)
 				return (NULL);
-
 			sprintf(status_str, "%d", last_status);
 			args[i] = status_str;
-			result = status_str;	/* remember it so we can free it later */
+			result = status_str;
+			continue;
+		}
+		/* ---------- $VAR ---------- */
+		if (args[i][0] == '$' && args[i][1] != '\0')
+		{
+			name = args[i] + 1;		/* skip the '$' */
+
+			value = NULL;
+			for (j = 0; env[j] != NULL; j++)
+			{
+				if (string_starts_with(env[j], name) &&
+				    env[j][string_length(name)] == '=')
+				{
+					value = env[j] + string_length(name) + 1;
+					break;
+				}
+			}
+			if (value != NULL)
+			{
+				/* Replace the argument with the value */
+				/* We allocate a copy so we can free it later */
+				status_str = string_duplicate(value);
+				if (status_str == NULL)
+					return (NULL);
+				args[i] = status_str;
+				result = status_str;
+			}
+			/* if the variable does not exist we leave $VAR as-is(most simple shells do this) */
 		}
 	}
 	return (result);
@@ -459,7 +490,7 @@ int execute_one_command(char *line, char ***env, char *program, int *exit_shell,
 	} while (tmp != NULL);
 
 	/* ... after split_line and alias expansion ... */
-	expanded_var = expand_variables(args, last_status);
+	expanded_var = expand_variables(args, *env, last_status);
 
 	/* ---------- normal command handling ---------- */
 	if (string_compare(args[0], "exit") == 0)
