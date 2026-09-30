@@ -401,21 +401,27 @@ void free_aliases(void)
  */
 void remove_comments(char *line)
 {
-	int i;
-	int in_single = 0;
-	int in_double = 0;
+	int i = 0;
 
-	for (i = 0; line[i] != '\0'; i++)
+	/* Skip leading spaces */
+	while (line[i] == ' ' || line[i] == '\t')
+		i++;
+
+	/* If the first non-space character is # → whole line is a comment */
+	if (line[i] == '#')
 	{
-		if (line[i] == '\'' && !in_double)
-			in_single = !in_single;
-		else if (line[i] == '"' && !in_single)
-			in_double = !in_double;
-		else if (line[i] == '#' && !in_single && !in_double)
+		line[0] = '\0';
+		return;
+	}
+	/* Look for " # " or "\t#" (space/tab followed by #) */
+	while (line[i] != '\0')
+	{
+		if ((line[i] == ' ' || line[i] == '\t') && line[i + 1] == '#')
 		{
-			line[i] = '\0';	/* cut the comment */
-			break;
+			line[i] = '\0';	/* cut from the space before # */
+			return;
 		}
+		i++;
 	}
 }
 /**
