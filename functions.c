@@ -426,6 +426,17 @@ char *expand_variables(char **args, char **env, int last_status)
 			result = new_str;
 			continue;
 		}
+		/* ---------- $$ (shell PID) ---------- */
+		if (string_compare(args[i], "$$") == 0)
+		{
+			new_str = malloc(16);
+			if (new_str == NULL)
+				return (NULL);
+			sprintf(new_str, "%d", getpid());   /* ← the important line */
+			args[i] = new_str;
+			result = new_str;
+			continue;
+		}
 		/* ---------- $VAR ---------- */
 		if (args[i][0] == '$' && args[i][1] != '\0')
 		{
@@ -443,15 +454,11 @@ char *expand_variables(char **args, char **env, int last_status)
 				}
 			}
 			if (value != NULL)
-			{
-				/* variable exists → use its value */
 				new_str = string_duplicate(value);
-			}
+			
 			else
-			{
-				/* variable does NOT exist → empty string */
-				new_str = string_duplicate("");
-			}
+				new_str = string_duplicate(""); /* undefined → empty */
+			
 			if (new_str == NULL)
 				return (NULL);
 
