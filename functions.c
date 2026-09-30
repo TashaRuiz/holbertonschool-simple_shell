@@ -439,10 +439,9 @@ int execute_one_command(char *line, char ***env, char *program, int *exit_shell,
 	char *args[64];
 	char *expanded_str = NULL;
 	char *tmp;
-	int status;
+	int status = 0;
 	char *expanded_var = NULL;
-	char *expanded_alias = NULL;
-
+	
 	split_line(line, args);
 	if (args[0] == NULL)
 		return (0);
@@ -465,20 +464,21 @@ int execute_one_command(char *line, char ***env, char *program, int *exit_shell,
 	/* ---------- normal command handling ---------- */
 	if (string_compare(args[0], "exit") == 0)
 	{
-		*exit_shell = 1;			/* ← uses exit_shell */
-
+		*exit_shell = 1; /* ← uses exit_shell */
 		if (args[1] != NULL)
 		{
 			if (!is_number(args[1]))
 			{
 				fprintf(stderr, "%s: 1: exit: Illegal number: %s\n", program, args[1]);
-				return (2);
+				status = 2;
 			}
-			return (string_to_int(args[1]));
+			else
+				status = string_to_int(args[1]);
 		}
-		return (last_status);			/* ← uses last_status */
+		else
+			status = last_status; /* ← uses last_status */
 	}
-	if (string_compare(args[0], "echo") == 0)
+	else if (string_compare(args[0], "echo") == 0)
 	{
 		int i;
 		for (i = 1; args[i] != NULL; i++)
@@ -488,7 +488,7 @@ int execute_one_command(char *line, char ***env, char *program, int *exit_shell,
 			write(STDOUT_FILENO, args[i], string_length(args[i]));
 		}
 		write(STDOUT_FILENO, "\n", 1);
-		return (0);
+		status = 0;
 	}
 	else if (string_compare(args[0], "env") == 0)
 	{
@@ -523,8 +523,8 @@ int execute_one_command(char *line, char ***env, char *program, int *exit_shell,
 	/* free what we allocated */
 	if (expanded_var != NULL)
 		free(expanded_var);
-	if (expanded_alias != NULL)
-		free(expanded_alias);
+	/*if (expanded_alias != NULL)
+		free(expanded_alias);*/
 
 	return (status);
 }
