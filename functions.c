@@ -396,6 +396,29 @@ void free_aliases(void)
 	alias_count = 0;
 }
 /**
+ * remove_comments - removes everything after the first unquoted #
+ * @line: the input line (modified in place)
+ */
+void remove_comments(char *line)
+{
+	int i;
+	int in_single = 0;
+	int in_double = 0;
+
+	for (i = 0; line[i] != '\0'; i++)
+	{
+		if (line[i] == '\'' && !in_double)
+			in_single = !in_single;
+		else if (line[i] == '"' && !in_single)
+			in_double = !in_double;
+		else if (line[i] == '#' && !in_single && !in_double)
+		{
+			line[i] = '\0';	/* cut the comment */
+			break;
+		}
+	}
+}
+/**
  * expand_variables - replaces $? with the last exit status
  * @args: argument list
  * @env: enviroment
