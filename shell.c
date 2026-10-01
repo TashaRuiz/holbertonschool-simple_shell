@@ -165,27 +165,47 @@ int process_line(char *line, char ***env, char *program, int *exit_shell, int la
 	return (status);
 }
 /**
- * read_line_from_file - reads one line from a FILE*
- * @fp: the file pointer
+ * read_line_from_fd - reads one line from a file descriptor
+ * @fd: file descriptor
  *
- * Return: allocated line (without the newline), or NULL on EOF/error
+ * Return: allocated line (without newline), or NULL on EOF/error
  */
-char *read_line_from_file(FILE *fp)
+char *read_line_from_fd(int fd)
 {
-	char *line = NULL;
-	size_t len = 0;
-	ssize_t nread;
+	char *line;
+	char character;
+	int i;
+	ssize_t bytes;
 
-	nread = getline(&line, &len, fp);
-	if (nread == -1)
-	{
-		free(line);
+	line = malloc(1024);
+	if (line == NULL)
 		return (NULL);
-	}
-	/* remove the trailing newline if present */
-	if (nread > 0 && line[nread - 1] == '\n')
-		line[nread - 1] = '\0';
 
+	i = 0;
+	while (i < 1023)
+	{
+		bytes = read(fd, &character, 1);
+		if (bytes == 0)			/* EOF */
+		{
+			if (i == 0)
+			{
+				free(line);
+				return (NULL);
+			}
+			break;
+		}
+		if (bytes == -1)
+		{
+			free(line);
+			return (NULL);
+		}
+		if (character == '\n')
+			break;
+
+		line[i] = character;
+		i++;
+	}
+	line[i] = '\0';
 	return (line);
 }
 /**
@@ -201,46 +221,48 @@ int main(int argc, char **argv, char **env)
 	char *line;
 	int status = 0;
 	int exit_shell = 0;
-	FILE *script = NULL;
+	int fd = -1; /* file descriptor instead of FILE* */
 	char *program = argv[0];
 
-	env = copy_environment(environ);	/* or however you copy the env */
+	env = copy_environment(environ); /* or however you copy the env */
 
 	/* ---------- Non-interactive mode: a file was given ---------- */
 	if (argc >= 2)
 	{
-		script = fopen(argv[1], "r");
-		if (script == NULL)
+		fd = open(argv[1], O_RDONLY);
+		if (fd == -1)
 		{
+			/* exact message required by the checker */
 			fprintf(stderr, "%s: 0: Can't open %s\n", program, argv[1]);
+			/* or if fprintf is also forbidden:
+			   write the message with write() */
 			free_environment(env);
-			free_aliases(); /* if you have it */
+			free_aliases();
 			return (127);
 		}
 	}
 	/* ---------- Main loop ---------- */
 	while (!exit_shell)
 	{
-		if (script != NULL)
+		if (fd != -1)
 		{
-			/* read from the script file */
-			line = read_line_from_file(script); /* your function to read a line from FILE* */;
-			if (line == NULL)	/* EOF */
+			/* read one line from the file descriptor */
+			line = read_line_from_fd(fd);	/* see helper below */
+			if (line == NULL)		/* EOF or error */
 				break;
 		}
 		else
 		{
-			/* interactive mode – read from stdin */
-			line = read_line();
-			if (line == NULL)	/* Ctrl+D / EOF */
+			line = read_line();		/* your existing interactive reader */
+			if (line == NULL)
 				break;
 		}
 
 		status = process_line(line, &env, program, &exit_shell, status);
 		free(line);
 	}
-	if (script != NULL)
-		fclose(script);
+	if (fd != -1)
+		close(fd);
 
 	free_environment(env);
 	free_aliases();
