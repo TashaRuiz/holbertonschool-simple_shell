@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <fcntl.h>   /* for open() and O_RDONLY */
 #define MAX_ALIASES 50
 
 char *read_line_from_fd(int fd);
