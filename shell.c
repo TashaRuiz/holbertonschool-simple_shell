@@ -216,16 +216,19 @@ char *read_line_from_fd(int fd)
  *
  * Return: status last command
  */
-int main(int argc, char **argv, char **env)
+int main(int argc, char **argv, char **envp)
 {
 	char *line;
+	char **env;
 	int status = 0;
 	int exit_shell = 0;
 	int fd = -1; /* file descriptor instead of FILE* */
 	char *program = argv[0];
 
-	env = copy_environment(environ); /* or however you copy the env */
+	env = copy_environment(envp); /* or however you copy the env */
 
+	if (env == NULL)
+		return (1);
 	/* ---------- Non-interactive mode: a file was given ---------- */
 	if (argc >= 2)
 	{
@@ -244,19 +247,25 @@ int main(int argc, char **argv, char **env)
 	/* ---------- Main loop ---------- */
 	while (!exit_shell)
 	{
+		if (fd == -1 && isatty(STDIN_FILENO))   /* solo si es terminal */
+			write(STDOUT_FILENO, "$ ", 2);
+
 		if (fd != -1)
 		{
 			/* read one line from the file descriptor */
-			line = read_line_from_fd(fd);	/* see helper below */
-			if (line == NULL)		/* EOF or error */
-				break;
+			line = read_line_from_fd(fd); /* see helper below */
+			/*EOF or error*/
+			/*if (line == NULL)
+				break;*/
 		}
 		else
 		{
-			line = read_line();		/* your existing interactive reader */
-			if (line == NULL)
-				break;
+			line = read_line(); /* your existing interactive reader */
+			/*if (line == NULL)
+				break;*/
 		}
+		if (line == NULL)
+			break;
 
 		status = process_line(line, &env, program, &exit_shell, status);
 		free(line);
