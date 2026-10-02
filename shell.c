@@ -43,7 +43,6 @@ char *find_command(char *command, char **env)
 	{
 		if (access(command, X_OK) == 0)
 			return (string_duplicate(command));
-
 		return (NULL);
 	}
 
@@ -52,28 +51,21 @@ char *find_command(char *command, char **env)
 		return (NULL);
 
 	start = path;
-	/*while (*start != '\0')*/
 	while (1)
 	{
 		end = start;
-		/*if (*end == '\0')
-			break;
-
-		start = end + 1;*/
 		while (*end != ':' && *end != '\0')
-		{
 			end++;
-		}
+
 		length = end - start;
+
 		if (length > 0)
 		{
-			/*creando una copia del directorio*/
 			dir = malloc(length + 1);
 			if (dir == NULL)
 				return (NULL);
 
-			/* Copiando solo este directorio y se pone en '\0' */
-			for (int i = 0; i < length; i++)
+			for (i = 0; i < length; i++)
 				dir[i] = start[i];
 			dir[length] = '\0';
 
@@ -83,12 +75,9 @@ char *find_command(char *command, char **env)
 			if (full != NULL)
 				return (full);
 		}
-		/*length = end - start;*/
 		if (*end == '\0')
-		{
-			 break;
-		}
-		  start = end + 1;
+			break;
+		start = end + 1;
 	}
 	return (NULL);
 }
