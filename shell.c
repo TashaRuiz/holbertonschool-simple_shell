@@ -34,6 +34,7 @@ char *find_command(char *command, char **env)
 	char *full;
 	char *dir;
 	int length;
+	int i;
 
 	if (command == NULL)
 		return (NULL);
