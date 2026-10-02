@@ -32,6 +32,7 @@ char *find_command(char *command, char **env)
 	char *start;
 	char *end;
 	char *full;
+	char *dir;
 	int length;
 
 	if (command == NULL)
@@ -65,7 +66,19 @@ char *find_command(char *command, char **env)
 		length = end - start;
 		if (length > 0)
 		{
-			full = build_path(start, command);
+			/*creando una copia del directorio*/
+			dir = malloc(length + 1);
+			if (dir == NULL)
+				return (NULL);
+
+			/* Copiando solo este directorio y se pone en '\0' */
+			for (int i = 0; i < length; i++)
+				dir[i] = start[i];
+			dir[length] = '\0';
+
+			full = build_path(dir, command);
+			free(dir);
+
 			if (full != NULL)
 				return (full);
 		}
