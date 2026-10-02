@@ -875,7 +875,7 @@ char *build_path(char *dir, char *command)
 	char *full;
 	size_t size;
 
-	size = strlen(dir) + strlen(command) + 2;
+	size = string_length(dir) + string_length(command) + 2;
 	full = malloc(size);
 	if (full == NULL)
 		return (NULL);
